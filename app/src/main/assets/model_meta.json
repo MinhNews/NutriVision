@@ -1,0 +1,12 @@
+{
+  "file": "model.tflite",
+  "input_size": 224,
+  "input_type": "float32",
+  "input_range": "0-255",
+  "input_layout": "NHWC",
+  "preprocessing": "input float32 0-255, preprocess MobileNetV3 nam trong model",
+  "output_type": "float32",
+  "num_classes": 131,
+  "threshold": 0.7,
+  "top_k": 3
+}
