@@ -1,0 +1,34 @@
+PAGE 01 · Design System — 1 node
+  NutriVision · Design System  1280x2378  maxY=2338
+PAGE 02 · Screen Flow — 1 node
+  NutriVision · Screen Flow  1520x880  maxY=880
+PAGE 03 · Wireframe — 31 node
+  W01 · Onboarding  390x844  maxY=810
+  W02 · Đăng nhập  390x844  maxY=691
+  W03 · Đăng ký  390x844  maxY=646
+  W04 · Thiết lập hồ sơ  390x844  maxY=771
+  W05 · Dashboard  390x844  maxY=844
+  W06 · Camera  390x844  maxY=844
+  W07 · Kết quả nhận diện  390x844  maxY=782
+  W08 · Chọn khẩu phần  390x844  maxY=837
+  W09 · Nhật ký ngày  390x844  maxY=844
+  W10 · Tìm kiếm món  390x844  maxY=608
+  W11 · Chi tiết mục nhật ký  390x844  maxY=776
+  W12 · Thống kê  390x844  maxY=844
+  W13 · Cá nhân & cài đặt  390x844  maxY=844
+  W14 · Trạng thái rỗng & lỗi  390x844  maxY=689
+PAGE 04 · Mockup — 31 node
+  M01 · Onboarding  390x844  maxY=810
+  M02 · Đăng nhập  390x844  maxY=691
+  M03 · Đăng ký  390x844  maxY=646
+  M04 · Thiết lập hồ sơ  390x844  maxY=771
+  M05 · Dashboard  390x844  maxY=844
+  M06 · Camera  390x844  maxY=844
+  M07 · Kết quả nhận diện  390x844  maxY=782
+  M08 · Chọn khẩu phần  390x844  maxY=837
+  M09 · Nhật ký ngày  390x844  maxY=844
+  M10 · Tìm kiếm món  390x844  maxY=608
+  M11 · Chi tiết mục nhật ký  390x844  maxY=776
+  M12 · Thống kê  390x844  maxY=844
+  M13 · Cá nhân & cài đặt  390x844  maxY=844
+  M14 · Trạng thái rỗng & lỗi  390x844  maxY=689
