@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>NutriVision — Báo cáo tuần 1</title>
+<style>
+  :root{
+    --green:#2E7D32; --green-d:#1B5E20; --green-l:#E8F5E9;
+    --orange:#EF6C00; --orange-l:#FFF3E0;
+    --ink:#16221A; --muted:#5B6B60; --line:#D8E3DA;
+    --bg:#EEF3EF;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:#16221A;
+    font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;
+    color:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;
+  }
+  #stage{width:1280px;height:720px;position:relative;transform-origin:center center}
+  .slide{
+    position:absolute;inset:0;
+    background:var(--bg);
+    padding:56px 72px 64px;
+    display:none;
+    flex-direction:column;
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .slide.active{display:flex}
+  .slide::after{
+    content:attr(data-foot);
+    position:absolute;left:72px;bottom:22px;
+    font-size:13px;color:var(--muted);letter-spacing:.02em;
+  }
+  .pagenum{
+    position:absolute;right:72px;bottom:20px;
+    font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;
+  }
+  h1{font-size:52px;line-height:1.08;letter-spacing:-.02em;font-weight:800}
+  h2{font-size:34px;line-height:1.15;font-weight:800;letter-spacing:-.01em;margin-bottom:6px}
+  .kicker{
+    font-size:14px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--green);margin-bottom:14px;
+  }
+  .rule{width:56px;height:5px;background:var(--orange);border-radius:3px;margin:14px 0 22px}
+  p,li{font-size:19px;line-height:1.5}
+  .muted{color:var(--muted)}
+
+  /* cover */
+  .cover{background:linear-gradient(135deg,#1B5E20 0%,#2E7D32 55%,#3C9142 100%);color:#fff;justify-content:center}
+  .cover .logo{
+    display:flex;align-items:center;gap:14px;margin-bottom:28px;
+  }
+  .cover .mark{
+    width:56px;height:56px;border-radius:16px;background:#fff;
+    display:grid;place-items:center;color:var(--green);font-size:30px;font-weight:800;
+  }
+  .cover h1{font-size:58px;max-width:900px}
+  .cover .sub{font-size:22px;color:#D7EBD8;margin-top:10px}
+  .cover .meta{
+    margin-top:44px;display:flex;gap:40px;font-size:16px;color:#CFE6D1;
+  }
+  .cover .meta b{display:block;color:#fff;font-size:17px;margin-bottom:4px}
+  .pill{
+    display:inline-block;align-self:flex-start;
+    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);
+    padding:6px 14px;border-radius:999px;font-size:14px;margin-top:26px;
+  }
+
+  /* layout helpers */
+  .row{display:flex;gap:28px;flex:1;min-height:0}
+  .col{flex:1;min-width:0}
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+
+  .card{
+    background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px;
+  }
+  .card h3{font-size:18px;margin-bottom:8px;color:var(--green-d)}
+  .card p{font-size:15.5px;line-height:1.45;color:#3C4A40}
+  .card .num{
+    font-size:13px;font-weight:800;color:var(--orange);letter-spacing:.08em;margin-bottom:6px;
+  }
+
+  ul.clean{list-style:none}
+  ul.clean li{position:relative;padding-left:26px;margin-bottom:13px;font-size:19px}
+  ul.clean li::before{
+    content:"";position:absolute;left:0;top:9px;width:10px;height:10px;
+    background:var(--green);border-radius:3px;
+  }
+  ul.clean li b{color:var(--green-d)}
+
+  table{width:100%;border-collapse:collapse;font-size:16px}
+  th,td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+  tbody tr:nth-child(even){background:#fff}
+  .yes{color:var(--green);font-weight:700}
+  .no{color:#B23A2E;font-weight:700}
+  .dim{color:#8A968D}
+
+  .big{font-size:76px;font-weight:800;line-height:1;letter-spacing:-.03em}
+  .big small{font-size:22px;font-weight:600;color:var(--muted);letter-spacing:0}
+
+  .quote{
+    border-left:5px solid var(--orange);background:#fff;padding:18px 22px;border-radius:0 12px 12px 0;
+    font-size:19px;line-height:1.45;
+  }
+
+  /* pipeline */
+  .pipe{display:flex;align-items:stretch;gap:10px}
+  .pipe .step{
+    flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 14px;
+  }
+  .pipe .step .t{font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--orange);margin-bottom:6px}
+  .pipe .step .d{font-size:15px;line-height:1.35}
+  .pipe .arrow{display:grid;place-items:center;color:#9FB3A3;font-size:20px;width:18px}
+
+  .tag{
+    display:inline-block;font-size:13px;padding:4px 10px;border-radius:999px;
+    background:var(--green-l);color:var(--green-d);font-weight:700;margin:0 6px 6px 0;
+  }
+  .tag.o{background:var(--orange-l);color:#A34700}
+
+  .footnote{font-size:13px;color:var(--muted);margin-top:auto}
+
+  /* slide 10 — dải số liệu sai số */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .stat .v{font-size:34px;font-weight:800;letter-spacing:-.02em;line-height:1.1;color:var(--green-d)}
+  .stat .v.bad{color:#B23A2E}
+  .stat .v.good{color:var(--green)}
+  .stat .l{font-size:14px;line-height:1.35;margin-top:6px;color:#3C4A40}
+
+  /* slide 7 — bảng so sánh (cần nén để không chạm footer) */
+  .slide.cmp th,.slide.cmp td{padding:9px 11px;font-size:15px}
+  .slide.cmp .quote{font-size:17px;padding:14px 20px;margin-top:12px !important}
+  .slide.uc .card{padding:13px 18px !important;margin-bottom:9px !important}
+  .slide.uc .card h3{font-size:15.5px;margin-bottom:3px}
+  .slide.uc .card p{font-size:14px;line-height:1.32}
+
+  /* nav */
+  #nav{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:9}
+  #nav button{
+    width:9px;height:9px;border-radius:50%;border:0;background:#4A5A4E;cursor:pointer;
+  }
+  #nav button.on{background:#8CC98F;width:26px;border-radius:999px}
+  @media print{
+    @page{size:1280px 720px;margin:0}
+    body{display:block;overflow:visible;background:#fff}
+    #stage{transform:none!important;width:auto;height:auto}
+    .slide{display:flex!important;position:relative;page-break-after:always;border-radius:0;width:1280px;height:720px}
+    .slide:last-child{page-break-after:auto}
+    #nav{display:none}
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- 1 -->
+<section class="slide cover" data-foot="" data-page="1">
+  <div class="logo"><div class="mark">N</div><div style="font-size:22px;font-weight:700;letter-spacing:.02em">NutriVision</div></div>
+  <h1>Phân tích dinh dưỡng<br>món ăn từ hình ảnh</h1>
+  <div class="sub">Chụp một bức ảnh — biết ngay bữa ăn của bạn</div>
+  <div class="pill">Báo cáo tuần 1 · Mô tả đề tài · Lập trình di động</div>
+  <div class="meta">
+    <div><b>Nhóm</b>3 thành viên</div>
+    <div><b>GVHD</b>Lê Minh Trí</div>
+    <div><b>Nền tảng</b>Android · Kotlin</div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="slide" data-foot="NutriVision · Tuần 1" data-page="2">
+  <div class="kicker">Đặt vấn đề</div>
+  <h2>Tô phở sáng nay của bạn<br>có bao nhiêu calo?</h2>
+  <div class="rule"></div>
+  <div class="row" style="align-items:center">
+    <div class="col">
+      <div class="big">60<small> giây/bữa</small></div>
+      <p class="muted" style="margin-top:10px">Thời gian trung bình để ghi một bữa ăn<br>trên các ứng dụng đếm calo hiện nay.</p>
+      <div style="height:18px"></div>
+      <div class="big" style="color:var(--orange)">7<small> ngày</small></div>
+      <p class="muted" style="margin-top:10px">Là khoảng thời gian phần lớn người dùng<br>kiên trì được trước khi bỏ cuộc.</p>
+    </div>
+    <div class="col" style="display:flex;flex-direction:column;gap:14px">
+      <div class="card"><h3>Vấn đề không nằm ở ý thức</h3><p>Người dùng muốn ăn lành mạnh, nhưng việc ghi chép quá phiền phức nên họ bỏ cuộc.</p></div>
+      <div class="card"><h3>Vấn đề nằm ở dữ liệu</h3><p>Các ứng dụng nổi tiếng có hàng triệu món — nhưng gần như không có món Việt, càng không có khẩu phần Việt.</p></div>
+      <div class="card" style="background:var(--green-l);border-color:#BFDCC2"><h3 style="color:var(--green-d)">Cơ hội</h3><p>Chụp ảnh chỉ mất 3 giây. Nếu ảnh nói được “món gì, bao nhiêu”, việc ghi chép gần như biến mất.</p></div>
+    </div>
+  </div>
+  <div class="pagenum">2 / 12</div>
+</section>
+
+<!-- 3 -->
+<section class="slide" data-foot="NutriVision · Tuần 1" data-page="3">
+  <div class="kicker">Lý do chọn đề tài</div>
+  <h2>Vì sao chọn NutriVision?</h2>
+  <div class="rule"></div>
+  <div class="grid g2" style="margin-top:4px">
+    <div class="card"><div class="num">01</div><h3>Nhu cầu thật</h3><p>Thừa cân và bệnh không lây nhiễm ở người trẻ tăng; nguyên nhân lớn đến từ chế độ ăn mà người dùng không kiểm soát được.</p></div>
+    <div class="card"><div class="num">02</div><h3>Điểm đau rõ ràng</h3><p>Ghi chép thủ công mất 30–60 giây/bữa. Chụp ảnh chỉ mất 3 giây — giảm 90% công sức, tăng khả năng duy trì.</p></div>
+    <div class="card"><div class="num">03</div><h3>Khoảng trống dữ liệu Việt</h3><p>MyFitnessPal, Foodvisor, Yazio rất nghèo món Việt và dùng đơn vị nước ngoài. Chưa có app nào lấy món Việt làm trung tâm.</p></div>
+    <div class="card"><div class="num">04</div><h3>Phù hợp môn học</h3><p>Vận dụng UI, camera, xử lý ảnh, cơ sở dữ liệu, API, thông báo, phân quyền, đóng gói — cộng thêm một lớp công nghệ mới.</p></div>
+  </div>
+  <div class="footnote">Đề tài vừa sức trong 6 tuần nếu giới hạn đúng phạm vi: 15 món, 100+ dữ liệu dinh dưỡng, chạy offline.</div>
+  <div class="pagenum">3 / 12</div>
+</section>
+
+<!-- 4 -->
+<section class="slide" data-foot="NutriVision · Tuần 1" data-page="4">
+  <div class="kicker">Mục đích</div>
+  <h2>Biến một bức ảnh thành<br>dữ liệu dinh dưỡng có thể hành động</h2>
+  <div class="rule"></div>
+  <div class="pipe" style="margin-bottom:22px">
+    <div class="step"><div class="t">BƯỚC 1</div><div class="d">Chụp ảnh bữa ăn</div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="t">BƯỚC 2</div><div class="d">AI gợi ý món (top-3)</div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="t">BƯỚC 3</div><div class="d">Chọn khẩu phần</div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="t">BƯỚC 4</div><div class="d">Nhận phân tích dinh dưỡng</div></div>
+  </div>
+  <table>
+    <thead><tr><th style="width:70px">Mã</th><th>Mục tiêu</th><th style="width:280px">Chỉ số đo lường</th></tr></thead>
+    <tbody>
+      <tr><td><b>M1</b></td><td>Ghi nhận một bữa ăn nhanh</td><td>≤ 15 giây/bữa</td></tr>
+      <tr><td><b>M2</b></td><td>Nhận diện đúng món trong top-3</td><td>≥ 80% trên 15 món</td></tr>
+      <tr><td><b>M3</b></td><td>Dữ liệu dinh dưỡng món Việt</td><td>≥ 100 món · 6 chỉ số</td></tr>
+      <tr><td><b>M4</b></td><td>Theo dõi được tiến độ</td><td>Biểu đồ 7 / 30 ngày</td></tr>
+      <tr><td><b>M5</b></td><td>Hoạt động không cần mạng</td><td>100% chức năng cốt lõi</td></tr>
+    </tbody>
+  </table>
+  <div class="pagenum">4 / 12</div>
+</section>
+
+<!-- 5 -->
+<section class="slide" data-foot="NutriVision · Tuần 1" data-page="5">
+  <div class="kicker">Người dùng</div>
+  <h2>Ứng dụng phục vụ ai?</h2>
+  <div class="rule"></div>
+  <div class="grid g3">
+    <div class="card">
+      <div class="num">PERSONA 1 · ~60%</div>
+      <h3>Sinh viên / nhân viên<br>muốn giảm cân</h3>
+      <p style="margin-top:8px">18–30 tuổi, ăn ngoài 2–3 bữa/ngày.</p>
+      <p style="margin-top:8px"><b>Nỗi đau:</b> đã thử ghi calo nhưng bỏ cuộc vì mất thời gian.</p>
+      <p style="margin-top:8px"><b>Cần:</b> ghi bữa ăn trong vài giây.</p>
+    </div>
+    <div class="card">
+      <div class="num">PERSONA 2 · ~25%</div>
+      <h3>Người tập luyện</h3>
+      <p style="margin-top:8px">Tập gym / chạy bộ 3–5 buổi mỗi tuần.</p>
+      <p style="margin-top:8px"><b>Nỗi đau:</b> khó ước lượng đạm của món Việt.</p>
+      <p style="margin-top:8px"><b>Cần:</b> xem nhanh macro, thống kê theo tuần.</p>
+    </div>
+    <div class="card">
+      <div class="num">PERSONA 3 · ~15%</div>
+      <h3>Người có bệnh lý<br>cần kiểm soát ăn uống</h3>
+      <p style="margin-top:8px">Tiểu đường, tăng huyết áp, mỡ máu.</p>
+      <p style="margin-top:8px"><b>Nỗi đau:</b> không biết món chứa bao nhiêu đường, muối.</p>
+      <p style="margin-top:8px"><b>Cần:</b> cảnh báo khi vượt ngưỡng.</p>
+    </div>
+  </div>
+  <div style="margin-top:20px" class="card">
+    <h3>Actor phụ (hệ thống)</h3>
+    <p><b>AI Engine (TFLite)</b> — nhận diện món &nbsp;·&nbsp; <b>API dinh dưỡng</b> — tra cứu bổ sung &nbsp;·&nbsp; <b>Quản trị viên</b> — quản lý danh mục món</p>
+  </div>
+  <div class="pagenum">5 / 12</div>
+</section>
+
+<!-- 6 -->
+<section class="slide" data-foot="NutriVision · Tuần 1" data-page="6">
+  <div class="kicker">Vấn đề → Giải pháp</div>
+  <h2>7 vấn đề, 7 cách xử lý</h2>
+  <div class="rule"></div>
+  <table>
+    <thead><tr><th style="width:44%">Vấn đề của người dùng</th><th>NutriVision giải quyết</th></tr></thead>
+    <tbody>
+      <tr><td>Ghi nhật ký thủ công mất thời gian → bỏ cuộc</td><td>Chụp ảnh → AI gợi ý → xác nhận 1 chạm (10 giây)</td></tr>
+      <tr><td>Không biết món Việt có bao nhiêu calo, đạm, muối</td><td>100+ món Việt, 6 chỉ số trên 100 g, quy đổi theo khẩu phần</td></tr>
+      <tr><td>App nước ngoài không có món Việt, đơn vị lạ</td><td>Việt hóa toàn bộ, khẩu phần theo tô/bát/đĩa/cái</td></tr>
+      <tr><td>Không biết hôm nay đã ăn bao nhiêu so với mục tiêu</td><td>Dashboard calo còn lại + 3 thanh macro</td></tr>
+      <tr><td>Không thấy tiến bộ nên mất động lực</td><td>Biểu đồ 7/30 ngày + chuỗi ngày ghi chép</td></tr>
+      <tr><td>Hay quên ghi bữa ăn</td><td>Nhắc nhở theo giờ, chạy offline</td></tr>
+      <tr><td>Ước lượng khẩu phần sai (tô nhỏ ≠ tô lớn)</td><td>Chọn nửa tô / 1 tô / tô lớn, tự quy đổi gram</td></tr>
+    </tbody>
+  </table>
+  <div class="pagenum">6 / 12</div>
+</section>
+
+<!-- 7 -->
+<section class="slide cmp" data-foot="NutriVision · Tuần 1" data-page="7">
+  <div class="kicker">Ứng dụng tương tự</div>
+  <h2>Đã có nhiều app — nhóm khác ở đâu?</h2>
+  <div class="rule"></div>
+  <table>
+    <thead><tr>
+      <th style="width:24%">Tiêu chí</th><th>MyFitnessPal</th><th>Foodvisor</th><th>Calorie Mama</th><th style="background:var(--green-l)">NutriVision</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>Nhận diện từ ảnh</td><td>Premium</td><td>Tốt</td><td>Có (API)</td><td style="background:#F6FBF6"><b class="yes">Offline trên máy</b></td></tr>
+      <tr><td>Dữ liệu món Việt</td><td class="no">Rất ít</td><td class="no">Gần như không</td><td class="no">Không</td><td style="background:#F6FBF6"><b class="yes">Trọng tâm 100+ món</b></td></tr>
+      <tr><td>Khẩu phần Việt</td><td class="no">Không</td><td class="no">Không</td><td class="no">Không</td><td style="background:#F6FBF6"><b class="yes">Tô, bát, đĩa, cái</b></td></tr>
+      <tr><td>Tiếng Việt</td><td>Kém</td><td class="no">Không</td><td class="no">Không</td><td style="background:#F6FBF6"><b class="yes">Hoàn toàn</b></td></tr>
+      <tr><td>Hoạt động offline</td><td>Một phần</td><td class="no">Không</td><td class="no">Không</td><td style="background:#F6FBF6"><b class="yes">Có</b></td></tr>
+      <tr><td>Chi phí</td><td>Free + Premium</td><td class="no">Trả phí</td><td class="no">Trả phí</td><td style="background:#F6FBF6"><b class="yes">Miễn phí</b></td></tr>
+      <tr><td>Quyền riêng tư</td><td>Đám mây</td><td>Đám mây</td><td>Đám mây</td><td style="background:#F6FBF6"><b class="yes">Lưu trên máy</b></td></tr>
+    </tbody>
+  </table>
+  <div class="quote" style="margin-top:18px">Không cạnh tranh về <b>số lượng món</b>. Cạnh tranh về <b>tốc độ nhập liệu – độ “Việt” của dữ liệu – khả năng chạy offline</b>.</div>
+  <div class="pagenum">7 / 12</div>
+</section>
+
+<!-- 8 -->
+<section class="slide" data-foot="NutriVision · Tuần 1" data-page="8">
+  <div class="kicker">Chức năng</div>
+  <h2>14 chức năng chính · 9 chức năng mở rộng</h2>
+  <div class="rule"></div>
+  <div class="row">
+    <div class="col" style="flex:1.5">
+      <h3 style="font-size:16px;color:var(--green-d);margin-bottom:12px;letter-spacing:.04em">BẮT BUỘC — PHẢI CHẠY ĐƯỢC Ở TUẦN 4</h3>
+      <div class="grid g2" style="gap:10px">
+        <div class="card" style="padding:12px 14px"><p style="font-size:14.5px"><b>F1–F2</b> Đăng ký · Đăng nhập · Quên mật khẩu</p></div>
+        <div class="card" style="padding:12px 14px"><p style="font-size:14.5px"><b>F3</b> Hồ sơ &amp; mục tiêu (BMI, TDEE)</p></div>
+        <div class="card" style="padding:12px 14px"><p style="font-size:14.5px"><b>F4</b> Chụp / chọn ảnh</p></div>
+        <div class="card" style="padding:12px 14px"><p style="font-size:14.5px"><b>F5</b> Nhận diện món (top-3)</p></div>
+        <div class="card" style="padding:12px 14px"><p style="font-size:14.5px"><b>F6</b> Xác nhận / sửa món</p></div>
+        <div class="card" style="padding:12px 14px"><p style="font-size:14.5px"><b>F7</b> Chọn khẩu phần</p></div>
+        <div class="card" style="padding:12px 14px"><p style="font-size:14.5px"><b>F8</b> Chi tiết dinh dưỡng</p></div>
+        <div class="card" style="padding:12px 14px"><p style="font-size:14.5px"><b>F9</b> Nhật ký: thêm / sửa / xóa</p></div>
+        <div class="card" style="padding:12px 14px"><p style="font-size:14.5px"><b>F10</b> Dashboard trong ngày</p></div>
+        <div class="card" style="padding:12px 14px"><p style="font-size:14.5px"><b>F11</b> Tìm kiếm &amp; lọc món</p></div>
+        <div class="card" style="padding:12px 14px"><p style="font-size:14.5px"><b>F12</b> Lịch sử &amp; thống kê</p></div>
+        <div class="card" style="padding:12px 14px"><p style="font-size:14.5px"><b>F13–F14</b> Nhắc nhở · Cài đặt</p></div>
+      </div>
+    </div>
+    <div class="col">
+      <h3 style="font-size:16px;color:#A34700;margin-bottom:12px;letter-spacing:.04em">MỞ RỘNG</h3>
+      <div class="card" style="background:var(--orange-l);border-color:#F3D3B6">
+        <p style="font-size:15px;line-height:1.7">
+          E1 · Gợi ý thực đơn theo calo còn lại<br>
+          E2 · Quét mã vạch sản phẩm<br>
+          E3 · Trợ lý dinh dưỡng AI<br>
+          E4 · Đồng bộ đám mây<br>
+          E5 · Xuất báo cáo PDF<br>
+          E6 · Nhiều món trong 1 ảnh<br>
+          E7 · Widget / đồng hồ<br>
+          E8 · Cộng đồng chia sẻ món<br>
+          E9 · Chuỗi ngày &amp; huy hiệu
+        </p>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h3>Ngoài phạm vi</h3>
+        <p>Không chẩn đoán bệnh · Không ước lượng khẩu phần tự động · Không web quản trị · Không iOS</p>
+      </div>
+    </div>
+  </div>
+  <div class="pagenum">8 / 12</div>
+</section>
+
+<!-- 9 -->
+<section class="slide uc" data-foot="NutriVision · Tuần 1" data-page="9">
+  <div class="kicker">Use case</div>
+  <h2>21 use case · 5 nhóm chức năng</h2>
+  <div class="rule"></div>
+  <div class="row">
+    <div class="col">
+      <div class="card" style="margin-bottom:12px">
+        <h3>1 · Tài khoản</h3>
+        <p>UC01 Đăng ký · UC02 Đăng nhập · UC03 Đăng xuất · UC04 Quên mật khẩu · UC05 Hồ sơ &amp; mục tiêu</p>
+      </div>
+      <div class="card" style="margin-bottom:12px;border-color:#F0C8A8;background:#FFFBF7">
+        <h3 style="color:#A34700">2 · Phân tích bữa ăn (trọng tâm)</h3>
+        <p>UC06 Chụp ảnh · UC07 Nhận diện · UC08 Xác nhận · UC09 Khẩu phần · UC10 Chi tiết dinh dưỡng</p>
+      </div>
+      <div class="card" style="margin-bottom:12px">
+        <h3>3 · Nhật ký &amp; theo dõi</h3>
+        <p>UC11 Ghi nhật ký · UC12 Sửa/xóa · UC13 Dashboard · UC14 Lịch sử &amp; thống kê</p>
+      </div>
+      <div class="card" style="margin-bottom:12px">
+        <h3>4 · Tra cứu &amp; tiện ích</h3>
+        <p>UC15 Tìm kiếm · UC16 Nhắc nhở · UC17 Cài đặt · UC18 Gợi ý thực đơn · UC19 Quét mã vạch</p>
+      </div>
+      <div class="card">
+        <h3>5 · Quản trị</h3>
+        <p>UC20 Quản lý món · UC21 Cập nhật dữ liệu</p>
+      </div>
+    </div>
+    <div class="col" style="flex:.85">
+      <div class="card" style="height:100%;display:flex;flex-direction:column;justify-content:center;background:#fff">
+        <h3 style="margin-bottom:14px">Actor</h3>
+        <p style="margin-bottom:10px"><span class="tag">Khách</span> đăng ký, đăng nhập</p>
+        <p style="margin-bottom:10px"><span class="tag">Người dùng</span> 15 use case nghiệp vụ</p>
+        <p style="margin-bottom:10px"><span class="tag">Quản trị viên</span> quản lý dữ liệu món</p>
+        <p style="margin-bottom:10px"><span class="tag o">AI Engine</span> trả top-3 nhãn</p>
+        <p><span class="tag o">API dinh dưỡng</span> tra món ngoài DB</p>
+        <div style="border-top:1px solid var(--line);margin:18px 0 12px"></div>
+        <p style="font-size:14px;color:var(--muted)">Sơ đồ đầy đủ (quan hệ include / extend) trình bày trong báo cáo — Hình 1 và Hình 2.</p>
+      </div>
+    </div>
+  </div>
+  <div class="pagenum">9 / 12</div>
+</section>
+
+<!-- 10 -->
+<section class="slide" data-foot="NutriVision · Tuần 1" data-page="10">
+  <div class="kicker">Kiến trúc &amp; công nghệ</div>
+  <h2>Một model AI — phần còn lại là dữ liệu</h2>
+  <div class="rule"></div>
+  <div class="pipe" style="margin-bottom:18px">
+    <div class="step"><div class="t">TẦNG 1 · AI</div><div class="d"><b>Nhận diện món</b><br>MobileNet · TFLite<br><span class="muted" style="font-size:13px">~100 ms, offline</span></div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="t">TẦNG 2 · NGƯỜI DÙNG</div><div class="d"><b>Chọn khẩu phần</b><br>Nhỏ / Vừa / Lớn<br><span class="muted" style="font-size:13px">3 giây, chính xác</span></div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="t">TẦNG 3 · DỮ LIỆU</div><div class="d"><b>Tra bảng + tính</b><br>100+ món Việt<br><span class="muted" style="font-size:13px">xác định, minh bạch</span></div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="t">TẦNG 4 · ĐÁNH GIÁ</div><div class="d"><b>Cảnh báo + điểm</b><br>so mục tiêu TDEE<br><span class="muted" style="font-size:13px">7 luật dinh dưỡng</span></div></div>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <h3>Công nghệ</h3>
+      <p>Kotlin · Jetpack Compose · MVVM + Repository<br>
+      Room (SQLite) · TFLite · CameraX<br>
+      Firebase Auth · Retrofit · WorkManager · Figma</p>
+    </div>
+    <div class="card" style="background:var(--green-l);border-color:#BFDCC2">
+      <h3 style="color:var(--green-d)">Nguyên tắc đã chốt</h3>
+      <p>AI chỉ <b>gợi ý</b> — người dùng quyết định.<br>Dinh dưỡng <b>không dùng AI</b> (tra bảng đã kiểm chứng).<br>Offline là mặc định — API chỉ là kênh bổ sung.</p>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="v bad">26%</div><div class="l">sai số khi đoán calo trực tiếp từ 1 ảnh<br><span class="muted">(Nutrition5k, Google CVPR 2021)</span></div></div>
+    <div class="stat"><div class="v">9,5%</div><div class="l">sai số khi biết khối lượng món<br><span class="muted">(cùng nghiên cứu)</span></div></div>
+    <div class="stat" style="border-color:#BFDCC2;background:var(--green-l)"><div class="v good">~10–15%</div><div class="l">sai số của cách nhóm chọn<br><span class="muted">tra bảng + người dùng chọn khẩu phần</span></div></div>
+  </div>
+  <div class="pagenum">10 / 12</div>
+</section>
+
+<!-- 11 -->
+<section class="slide" data-foot="NutriVision · Tuần 1" data-page="11">
+  <div class="kicker">Phân công</div>
+  <h2>3 người — 3 mảng rõ ràng</h2>
+  <div class="rule"></div>
+  <div class="grid g3">
+    <div class="card">
+      <div class="num">TV1 · NHÓM TRƯỞNG</div>
+      <h3>Android Lead</h3>
+      <p style="font-size:15px;margin-top:8px">Kiến trúc, điều hướng, Camera + AI (TFLite), tích hợp, review, GitHub, tiến độ.</p>
+      <p style="font-size:14px;margin-top:10px;color:var(--muted)">Bàn giao: core/, feature/camera, model .tflite, APK</p>
+    </div>
+    <div class="card">
+      <div class="num">TV2</div>
+      <h3>Data &amp; Backend</h3>
+      <p style="font-size:15px;margin-top:8px">ERD, Room, 100+ món Việt, Repository, Retrofit, Firebase.</p>
+      <p style="font-size:14px;margin-top:10px;color:var(--muted)">Bàn giao: data/local, data/remote, foods.json</p>
+    </div>
+    <div class="card">
+      <div class="num">TV3</div>
+      <h3>UI/UX &amp; QA</h3>
+      <p style="font-size:15px;margin-top:8px">Figma, design system, màn hình Compose, biểu đồ, thông báo, test case &amp; bug log.</p>
+      <p style="font-size:14px;margin-top:10px;color:var(--muted)">Bàn giao: ui/, Figma, TestCases.xlsx</p>
+    </div>
+  </div>
+  <h3 style="font-size:15px;color:var(--muted);letter-spacing:.06em;margin:22px 0 10px">LỘ TRÌNH 6 TUẦN</h3>
+  <div class="pipe">
+    <div class="step" style="background:#fff"><div class="t">TUẦN 1</div><div class="d">Mô tả đề tài</div></div>
+    <div class="arrow">→</div>
+    <div class="step" style="background:#fff"><div class="t">TUẦN 2</div><div class="d">Thiết kế giao diện</div></div>
+    <div class="arrow">→</div>
+    <div class="step" style="background:#fff"><div class="t">TUẦN 3</div><div class="d">CSDL &amp; kiến trúc</div></div>
+    <div class="arrow">→</div>
+    <div class="step" style="background:#fff"><div class="t">TUẦN 4</div><div class="d">Xây dựng chức năng</div></div>
+    <div class="arrow">→</div>
+    <div class="step" style="background:#fff"><div class="t">TUẦN 5</div><div class="d">Kiểm thử &amp; sửa lỗi</div></div>
+    <div class="arrow">→</div>
+    <div class="step" style="background:#fff"><div class="t">TUẦN 6</div><div class="d">Sản phẩm hoàn thiện</div></div>
+  </div>
+  <div class="pagenum">11 / 12</div>
+</section>
+
+<!-- 12 -->
+<section class="slide" data-foot="NutriVision · Tuần 1" data-page="12">
+  <div class="kicker">Kết thúc</div>
+  <h2>Cảm ơn thầy và các bạn</h2>
+  <div class="rule"></div>
+  <div class="row">
+    <div class="col">
+      <h3 style="font-size:16px;color:var(--green-d);margin-bottom:12px">TUẦN 1 ĐÃ HOÀN THÀNH</h3>
+      <ul class="clean">
+        <li><b>Tên, lý do, mục đích</b> — 5 mục tiêu đo lường được</li>
+        <li><b>Người dùng</b> — 3 persona, 7 vấn đề</li>
+        <li><b>So sánh</b> — 3 ứng dụng, định vị rõ ràng</li>
+        <li><b>Chức năng</b> — 14 chính, 9 mở rộng</li>
+        <li><b>Use case</b> — 21 UC, 2 sơ đồ</li>
+        <li><b>Công nghệ &amp; phân công</b> — chốt, không đổi sau tuần 2</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="card" style="background:var(--green-l);border-color:#BFDCC2;margin-bottom:14px">
+        <h3 style="color:var(--green-d)">Việc làm ngay</h3>
+        <p>Chốt 15 món · Thu ảnh &amp; dữ liệu dinh dưỡng (20 món/tuần) · Tải dataset món Việt · Khởi tạo GitHub</p>
+      </div>
+      <div class="card">
+        <h3>Ba câu hỏi nhóm đã chuẩn bị</h3>
+        <p><b>AI sai thì sao?</b> — luôn có bước xác nhận và tìm thủ công.<br>
+        <b>Dữ liệu ở đâu?</b> — Viện Dinh dưỡng VN + USDA, ghi rõ nguồn.<br>
+        <b>Khác MyFitnessPal?</b> — nhanh hơn, Việt hơn, offline.</p>
+      </div>
+    </div>
+  </div>
+  <div class="pagenum">12 / 12</div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  const nav = document.getElementById('nav');
+  let i = 0;
+
+  slides.forEach((_, k) => {
+    const b = document.createElement('button');
+    b.onclick = () => go(k);
+    nav.appendChild(b);
+  });
+
+  function go(n){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => s.classList.toggle('active', k === i));
+    [...nav.children].forEach((b, k) => b.classList.toggle('on', k === i));
+    history.replaceState(null, '', '#' + (i + 1));
+  }
+
+  function fit(){
+    const s = Math.min(window.innerWidth / 1280, window.innerHeight / 720) * 0.96;
+    document.getElementById('stage').style.transform = `scale(${s})`;
+  }
+
+  addEventListener('resize', fit);
+  addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(i + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(i - 1); }
+    if (e.key === 'Home') go(0);
+    if (e.key === 'End') go(slides.length - 1);
+  });
+  addEventListener('click', e => {
+    if (e.target.closest('#nav')) return;
+    go(e.clientX < innerWidth * 0.2 ? i - 1 : i + 1);
+  });
+
+  fit();
+  go(parseInt(location.hash.slice(1)) - 1 || 0);
+</script>
+</body>
+</html>

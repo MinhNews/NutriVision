@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NutriVision — Nhiệm Vụ Tuần 2: Dựng Layout Tĩnh Jetpack Compose</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    pre, code { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
+
+  <!-- Header -->
+  <div class="max-w-5xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-800 gap-4">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold mb-2">
+          <span>🚀 Lập Trình Di Động</span> • <span>Tuần 2: Dựng Layout Tĩnh</span>
+        </div>
+        <h1 class="text-2xl md:text-3xl font-extrabold text-white">BẢNG NHIỆM VỤ NHÓM: DỰNG GIAO DIỆN TĨNH</h1>
+        <p class="text-slate-400 text-sm mt-1">Repo GitHub: <a href="https://github.com/MinhNews/NutriVision" target="_blank" class="text-emerald-400 underline font-mono">github.com/MinhNews/NutriVision</a></p>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 p-3 rounded-2xl flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-lg">3</div>
+        <div class="text-xs">
+          <p class="text-slate-400 font-medium">Phân chia nhóm:</p>
+          <p class="text-white font-bold">3 Thành viên • 3 Nhánh Git</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert Guideline -->
+    <div class="my-6 p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-200 text-xs md:text-sm flex gap-3">
+      <span class="text-lg">📌</span>
+      <div>
+        <strong class="font-bold text-emerald-400">Nguyên tắc chuẩn môn học:</strong> Tuần 2 chỉ dựng <strong>khung xương giao diện thật (UI Skeleton)</strong> bằng Jetpack Compose. Chưa kết nối Database hay API thật. Mỗi bạn phụ trách 1 nhánh, tự copy code vào đúng file, kiểm tra chạy thử và đẩy lên GitHub để cả 3 người đều có commit đóng góp!
+      </div>
+    </div>
+
+    <!-- Member Tabs -->
+    <div class="flex gap-2 p-1 bg-slate-900 rounded-2xl border border-slate-800 mb-8 overflow-x-auto">
+      <button onclick="switchTab('tv1')" id="tab-tv1" class="tab-btn flex-1 min-w-[160px] py-3 px-4 rounded-xl text-xs md:text-sm font-bold transition bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
+        👤 TV1: Theme & Dashboard
+      </button>
+      <button onclick="switchTab('tv2')" id="tab-tv2" class="tab-btn flex-1 min-w-[160px] py-3 px-4 rounded-xl text-xs md:text-sm font-bold transition text-slate-400 hover:text-white">
+        👤 TV2: Camera & Meal Detail
+      </button>
+      <button onclick="switchTab('tv3')" id="tab-tv3" class="tab-btn flex-1 min-w-[160px] py-3 px-4 rounded-xl text-xs md:text-sm font-bold transition text-slate-400 hover:text-white">
+        👤 TV3: Auth, Profile & Nav
+      </button>
+    </div>
+
+    <!-- ==================== TV1 SECTION ==================== -->
+    <div id="content-tv1" class="tab-content space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Thành viên 1 (Android Lead)</span>
+            <h2 class="text-xl font-bold text-white mt-1">Nhiệm vụ: Cấu hình Theme & Khung Trang Chủ (Dashboard)</h2>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-mono font-bold">feature/tv1-theme-and-dashboard</span>
+        </div>
+
+        <!-- Git Commands for TV1 -->
+        <div class="mb-6 bg-slate-950 p-4 rounded-2xl border border-slate-800">
+          <p class="text-xs font-bold text-slate-400 mb-2">💻 Bước 1: Mở Terminal tại thư mục project và tạo nhánh Git riêng:</p>
+          <pre class="text-xs text-emerald-400 bg-slate-900 p-3 rounded-xl overflow-x-auto"><code>git checkout main
+git pull origin main
+git checkout -b feature/tv1-theme-and-dashboard</code></pre>
+        </div>
+
+        <!-- Files to edit -->
+        <div class="space-y-6">
+          <!-- File 1.1: Color.kt -->
+          <div class="border border-slate-800 rounded-2xl overflow-hidden">
+            <div class="bg-slate-950 px-4 py-3 flex justify-between items-center border-b border-slate-800">
+              <span class="text-xs font-mono font-bold text-slate-300">📁 app/src/main/java/com/example/nutrivision/ui/theme/Color.kt</span>
+              <button onclick="copyCode('code-color')" class="px-3 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg text-xs font-semibold transition">Sao chép code</button>
+            </div>
+            <pre class="p-4 text-xs text-slate-300 overflow-x-auto bg-slate-950/60 max-h-72"><code id="code-color">package com.example.nutrivision.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+// Default Material 3 colors (dự phòng)
+val Purple80 = Color(0xFFD0BCFF)
+val PurpleGrey80 = Color(0xFFCCC2DC)
+val Pink80 = Color(0xFFEFB8C8)
+val Purple40 = Color(0xFF6650a4)
+val PurpleGrey40 = Color(0xFF625b71)
+val Pink40 = Color(0xFF7D5260)
+
+// Màu nhận diện thương hiệu NutriVision
+val PrimaryGreen = Color(0xFF10B981)      // Xanh dinh dưỡng chủ đạo
+val PrimaryGreenDark = Color(0xFF059669)
+val SecondaryAmber = Color(0xFFF59E0B)    // Cam calo
+val AccentIndigo = Color(0xFF6366F1)      // Tím tính năng AI
+
+// Màu 3 nhóm chất dinh dưỡng vĩ mô (Macro)
+val MacroProtein = Color(0xFF3B82F6)      // Xanh dương - Đạm
+val MacroCarb = Color(0xFFF59E0B)         // Vàng cam - Tinh bột
+val MacroFat = Color(0xFFEF4444)          // Đỏ - Chất béo
+
+// Màu nền và màu trung tính
+val BackgroundLight = Color(0xFFF8FAFC)
+val SurfaceLight = Color(0xFFFFFFFF)
+val TextPrimary = Color(0xFF0F172A)
+val TextSecondary = Color(0xFF64748B)
+val BorderLight = Color(0xFFE2E8F0)
+</code></pre>
+          </div>
+
+          <!-- File 1.2: Theme.kt -->
+          <div class="border border-slate-800 rounded-2xl overflow-hidden">
+            <div class="bg-slate-950 px-4 py-3 flex justify-between items-center border-b border-slate-800">
+              <span class="text-xs font-mono font-bold text-slate-300">📁 app/src/main/java/com/example/nutrivision/ui/theme/Theme.kt</span>
+              <button onclick="copyCode('code-theme')" class="px-3 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg text-xs font-semibold transition">Sao chép code</button>
+            </div>
+            <pre class="p-4 text-xs text-slate-300 overflow-x-auto bg-slate-950/60 max-h-72"><code id="code-theme">package com.example.nutrivision.ui.theme
+
+import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+
+private val DarkColorScheme = darkColorScheme(
+    primary = PrimaryGreen,
+    secondary = SecondaryAmber,
+    tertiary = AccentIndigo,
+    background = Color(0xFF0F172A),
+    surface = Color(0xFF1E293B)
+)
+
+private val LightColorScheme = lightColorScheme(
+    primary = PrimaryGreen,
+    secondary = SecondaryAmber,
+    tertiary = AccentIndigo,
+    background = BackgroundLight,
+    surface = SurfaceLight,
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onBackground = TextPrimary,
+    onSurface = TextPrimary
+)
+
+@Composable
+fun NutriVisionTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    // Tắt dynamicColor để app luôn giữ đúng màu xanh thương hiệu NutriVision trên mọi thiết bị
+    dynamicColor: Boolean = false,
+    content: @Composable () -> Unit
+) {
+    val colorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            val context = LocalContext.current
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+
+        darkTheme -> DarkColorScheme
+        else -> LightColorScheme
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = Typography,
+        content = content
+    )
+}
+</code></pre>
+          </div>
+
+          <!-- File 1.3: DashboardScreen.kt -->
+          <div class="border border-slate-800 rounded-2xl overflow-hidden">
+            <div class="bg-slate-950 px-4 py-3 flex justify-between items-center border-b border-slate-800">
+              <span class="text-xs font-mono font-bold text-slate-300">📁 app/src/main/java/com/example/nutrivision/ui/screens/DashboardScreen.kt (Tạo file mới)</span>
+              <button onclick="copyCode('code-dashboard')" class="px-3 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg text-xs font-semibold transition">Sao chép code</button>
+            </div>
+            <pre class="p-4 text-xs text-slate-300 overflow-x-auto bg-slate-950/60 max-h-96"><code id="code-dashboard">package com.example.nutrivision.ui.screens
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.nutrivision.ui.theme.*
+
+@Composable
+fun DashboardScreen(onScanClick: () -> Unit = {}) {
+    Scaffold(
+        containerColor = BackgroundLight
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // 1. Header chào mừng
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(text = "Chào buổi sáng 👋", fontSize = 14.sp, color = TextSecondary)
+                        Text(text = "Hôm nay, 05 Th11", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                    }
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .background(PrimaryGreen.copy(alpha = 0.2f), RoundedCornerShape(21.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "NV", fontWeight = FontWeight.Bold, color = PrimaryGreen)
+                    }
+                }
+            }
+
+            // 2. Khung thẻ Calo tổng quan
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = SurfaceLight),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = "Calo còn lại hôm nay", fontSize = 13.sp, color = TextSecondary)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = "1,250", fontSize = 38.sp, fontWeight = FontWeight.Bold, color = PrimaryGreen)
+                        Text(text = "Mục tiêu: 1,800 kcal", fontSize = 12.sp, color = TextSecondary)
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        HorizontalDivider(color = BorderLight)
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // 3 Cột Macro
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceAround
+                        ) {
+                            MacroStatItem("Đạm", "45g / 110g", MacroProtein)
+                            MacroStatItem("Carb", "90g / 220g", MacroCarb)
+                            MacroStatItem("Béo", "25g / 60g", MacroFat)
+                        }
+                    }
+                }
+            }
+
+            // 3. Khung danh sách 4 bữa ăn
+            item {
+                Text(text = "Bữa ăn trong ngày", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+            }
+
+            item { MealStaticCard("Bữa Sáng ☀️", "1 Ổ bánh mì thịt (340 kcal)", isDone = true) }
+            item { MealStaticCard("Bữa Trưa 🍲", "Chưa có món ăn", isDone = false, onClick = onScanClick) }
+            item { MealStaticCard("Bữa Tối 🌙", "Chưa có món ăn", isDone = false) }
+            item { MealStaticCard("Bữa Phụ ☕", "Chưa có món ăn", isDone = false) }
+        }
+    }
+}
+
+@Composable
+fun MacroStatItem(name: String, value: String, color: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = color)
+        Text(text = value, fontSize = 12.sp, color = TextSecondary)
+    }
+}
+
+@Composable
+fun MealStaticCard(title: String, subtitle: String, isDone: Boolean, onClick: () -> Unit = {}) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = SurfaceLight),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(text = title, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = TextPrimary)
+                Text(text = subtitle, fontSize = 13.sp, color = if (isDone) TextPrimary else TextSecondary)
+            }
+            Button(
+                onClick = onClick,
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isDone) PrimaryGreen.copy(alpha = 0.15f) else PrimaryGreen,
+                    contentColor = if (isDone) PrimaryGreen else Color.White
+                ),
+                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+            ) {
+                Text(text = if (isDone) "Đã ghi" else "+ Thêm", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewDashboard() {
+    DashboardScreen()
+}
+</code></pre>
+          </div>
+        </div>
+
+        <!-- Git Push for TV1 -->
+        <div class="mt-6 bg-slate-950 p-4 rounded-2xl border border-slate-800">
+          <p class="text-xs font-bold text-slate-400 mb-2">🚀 Bước 2: Commit và đẩy lên GitHub:</p>
+          <pre class="text-xs text-emerald-400 bg-slate-900 p-3 rounded-xl overflow-x-auto"><code>git add .
+git commit -m "feat(ui): setup theme and dashboard layout skeleton"
+git push -u origin feature/tv1-theme-and-dashboard</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TV2 SECTION ==================== -->
+    <div id="content-tv2" class="tab-content space-y-6 hidden">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Thành viên 2 (Data & Feature Lead)</span>
+            <h2 class="text-xl font-bold text-white mt-1">Nhiệm vụ: Dựng Khung Camera & Khung Tinh Chỉnh Khẩu Phần</h2>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-mono font-bold">feature/tv2-camera-and-meal-detail</span>
+        </div>
+
+        <!-- Git Commands for TV2 -->
+        <div class="mb-6 bg-slate-950 p-4 rounded-2xl border border-slate-800">
+          <p class="text-xs font-bold text-slate-400 mb-2">💻 Bước 1: Mở Terminal tạo nhánh Git riêng:</p>
+          <pre class="text-xs text-emerald-400 bg-slate-900 p-3 rounded-xl overflow-x-auto"><code>git checkout main
+git pull origin main
+git checkout -b feature/tv2-camera-and-meal-detail</code></pre>
+        </div>
+
+        <div class="space-y-6">
+          <!-- File 2.1: CameraScreen.kt -->
+          <div class="border border-slate-800 rounded-2xl overflow-hidden">
+            <div class="bg-slate-950 px-4 py-3 flex justify-between items-center border-b border-slate-800">
+              <span class="text-xs font-mono font-bold text-slate-300">📁 app/src/main/java/com/example/nutrivision/ui/screens/CameraScreen.kt</span>
+              <button onclick="copyCode('code-camera')" class="px-3 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg text-xs font-semibold transition">Sao chép code</button>
+            </div>
+            <pre class="p-4 text-xs text-slate-300 overflow-x-auto bg-slate-950/60 max-h-80"><code id="code-camera">package com.example.nutrivision.ui.screens
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.nutrivision.ui.theme.PrimaryGreen
+
+@Composable
+fun CameraScreen(onCaptureClick: () -> Unit = {}) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0F172A))
+    ) {
+        // Khung ngắm chụp ảnh (Viewfinder)
+        Box(
+            modifier = Modifier
+                .size(280.dp)
+                .align(Alignment.Center)
+                .border(2.dp, PrimaryGreen, RoundedCornerShape(24.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Đặt món ăn vào giữa khung hình",
+                color = Color.White.copy(alpha = 0.8f),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+
+        // Thanh thao tác dưới đáy
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 36.dp, start = 24.dp, end = 24.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Nút Thư viện
+            Button(
+                onClick = {},
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.15f))
+            ) {
+                Text(text = "🖼️ Thư viện", fontSize = 12.sp)
+            }
+
+            // Nút Chụp tròn
+            Box(
+                modifier = Modifier
+                    .size(72.dp)
+                    .border(4.dp, Color.White, CircleShape)
+                    .padding(6.dp)
+                    .background(PrimaryGreen, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                IconButton(onClick = onCaptureClick) {
+                    Box(modifier = Modifier.size(40.dp))
+                }
+            }
+
+            // Nút Flash
+            Button(
+                onClick = {},
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.15f))
+            ) {
+                Text(text = "⚡ Flash", fontSize = 12.sp)
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewCamera() {
+    CameraScreen()
+}
+</code></pre>
+          </div>
+
+          <!-- File 2.2: MealDetailScreen.kt -->
+          <div class="border border-slate-800 rounded-2xl overflow-hidden">
+            <div class="bg-slate-950 px-4 py-3 flex justify-between items-center border-b border-slate-800">
+              <span class="text-xs font-mono font-bold text-slate-300">📁 app/src/main/java/com/example/nutrivision/ui/screens/MealDetailScreen.kt</span>
+              <button onclick="copyCode('code-mealdetail')" class="px-3 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg text-xs font-semibold transition">Sao chép code</button>
+            </div>
+            <pre class="p-4 text-xs text-slate-300 overflow-x-auto bg-slate-950/60 max-h-96"><code id="code-mealdetail">package com.example.nutrivision.ui.screens
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.nutrivision.ui.theme.*
+
+@Composable
+fun MealDetailScreen(onSaveClick: () -> Unit = {}) {
+    Scaffold(
+        containerColor = BackgroundLight,
+        bottomBar = {
+            Button(
+                onClick = onSaveClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .height(52.dp),
+                shape = RoundedCornerShape(26.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+            ) {
+                Text(text = "LƯU VÀO BỮA ĂN", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // 1. Thẻ kết quả AI
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = AccentIndigo.copy(alpha = 0.08f))
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(text = "✨ AI NHẬN DIỆN MÓN", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = AccentIndigo)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = "Phở bò tái nạm", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                    Text(text = "Độ tin cậy: 89% • Chạm để đổi món", fontSize = 12.sp, color = TextSecondary)
+                }
+            }
+
+            // 2. Chọn khẩu phần
+            Text(text = "Khẩu phần chính:", fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = TextPrimary)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(selected = false, onClick = {}, label = { Text("Nhỏ (350g)") })
+                FilterChip(selected = true, onClick = {}, label = { Text("Vừa (500g)") },
+                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = PrimaryGreen.copy(alpha = 0.2f)))
+                FilterChip(selected = false, onClick = {}, label = { Text("Lớn (700g)") })
+            }
+
+            // 3. Khung tinh chỉnh Topping
+            Text(text = "Tùy chỉnh thêm/bớt:", fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = TextPrimary)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                AssistChip(onClick = {}, label = { Text("+ Thịt bò (50g)") })
+                AssistChip(onClick = {}, label = { Text("+ 1 Trứng chần") })
+                AssistChip(onClick = {}, label = { Text("- Bớt bánh") })
+            }
+
+            // 4. Bảng tính dinh dưỡng
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = SurfaceLight),
+                elevation = CardDefaults.cardElevation(2.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(text = "Tổng dinh dưỡng:", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = TextPrimary)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+                        NutriStatItem("Năng lượng", "450 kcal", PrimaryGreen)
+                        NutriStatItem("Đạm", "25 g", MacroProtein)
+                        NutriStatItem("Carb", "55 g", MacroCarb)
+                        NutriStatItem("Béo", "14 g", MacroFat)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun NutriStatItem(label: String, value: String, color: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = value, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = color)
+        Text(text = label, fontSize = 11.sp, color = TextSecondary)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewMealDetail() {
+    MealDetailScreen()
+}
+</code></pre>
+          </div>
+        </div>
+
+        <!-- Git Push for TV2 -->
+        <div class="mt-6 bg-slate-950 p-4 rounded-2xl border border-slate-800">
+          <p class="text-xs font-bold text-slate-400 mb-2">🚀 Bước 2: Commit và đẩy lên GitHub:</p>
+          <pre class="text-xs text-emerald-400 bg-slate-900 p-3 rounded-xl overflow-x-auto"><code>git add .
+git commit -m "feat(ui): add camera and meal detail layout skeletons"
+git push -u origin feature/tv2-camera-and-meal-detail</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TV3 SECTION ==================== -->
+    <div id="content-tv3" class="tab-content space-y-6 hidden">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Thành viên 3 (UI/UX & Integration Lead)</span>
+            <h2 class="text-xl font-bold text-white mt-1">Nhiệm vụ: Dựng Khung Auth, Profile & Nối Bottom Navigation</h2>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-mono font-bold">feature/tv3-auth-profile-navigation</span>
+        </div>
+
+        <!-- Git Commands for TV3 -->
+        <div class="mb-6 bg-slate-950 p-4 rounded-2xl border border-slate-800">
+          <p class="text-xs font-bold text-slate-400 mb-2">💻 Bước 1: Mở Terminal tạo nhánh Git riêng:</p>
+          <pre class="text-xs text-emerald-400 bg-slate-900 p-3 rounded-xl overflow-x-auto"><code>git checkout main
+git pull origin main
+git checkout -b feature/tv3-auth-profile-navigation</code></pre>
+        </div>
+
+        <div class="space-y-6">
+          <!-- File 3.1: AuthScreen.kt -->
+          <div class="border border-slate-800 rounded-2xl overflow-hidden">
+            <div class="bg-slate-950 px-4 py-3 flex justify-between items-center border-b border-slate-800">
+              <span class="text-xs font-mono font-bold text-slate-300">📁 app/src/main/java/com/example/nutrivision/ui/screens/AuthScreen.kt</span>
+              <button onclick="copyCode('code-auth')" class="px-3 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg text-xs font-semibold transition">Sao chép code</button>
+            </div>
+            <pre class="p-4 text-xs text-slate-300 overflow-x-auto bg-slate-950/60 max-h-80"><code id="code-auth">package com.example.nutrivision.ui.screens
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.nutrivision.ui.theme.*
+
+@Composable
+fun AuthScreen(onLoginSuccess: () -> Unit = {}) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var isRegister by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = if (isRegister) "Tạo tài khoản mới" else "Chào mừng trở lại 👋",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = TextPrimary
+        )
+        Text(
+            text = "NutriVision — Dinh dưỡng thông minh",
+            fontSize = 14.sp,
+            color = TextSecondary,
+            modifier = Modifier.padding(top = 4.dp, bottom = 32.dp)
+        )
+
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
+            placeholder = { Text("vidu@gmail.com") },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Mật khẩu") },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = onLoginSuccess,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            shape = RoundedCornerShape(25.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+        ) {
+            Text(
+                text = if (isRegister) "Đăng ký" else "Đăng nhập",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextButton(onClick = { isRegister = !isRegister }) {
+            Text(
+                text = if (isRegister) "Đã có tài khoản? Đăng nhập ngay" else "Chưa có tài khoản? Đăng ký ngay",
+                color = PrimaryGreen,
+                fontSize = 13.sp
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewAuth() {
+    AuthScreen()
+}
+</code></pre>
+          </div>
+
+          <!-- File 3.2: ProfileScreen.kt -->
+          <div class="border border-slate-800 rounded-2xl overflow-hidden">
+            <div class="bg-slate-950 px-4 py-3 flex justify-between items-center border-b border-slate-800">
+              <span class="text-xs font-mono font-bold text-slate-300">📁 app/src/main/java/com/example/nutrivision/ui/screens/ProfileScreen.kt</span>
+              <button onclick="copyCode('code-profile')" class="px-3 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg text-xs font-semibold transition">Sao chép code</button>
+            </div>
+            <pre class="p-4 text-xs text-slate-300 overflow-x-auto bg-slate-950/60 max-h-80"><code id="code-profile">package com.example.nutrivision.ui.screens
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.nutrivision.ui.theme.*
+
+@Composable
+fun ProfileScreen(onLogoutClick: () -> Unit = {}) {
+    var height by remember { mutableStateOf("170") }
+    var weight by remember { mutableStateOf("65") }
+    var age by remember { mutableStateOf("22") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(text = "Hồ sơ thể trạng (BMI / TDEE)", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+        Text(text = "Dữ liệu để tính toán mục tiêu Calo phù hợp cho bạn", fontSize = 13.sp, color = TextSecondary)
+
+        OutlinedTextField(
+            value = height,
+            onValueChange = { height = it },
+            label = { Text("Chiều cao (cm)") },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        OutlinedTextField(
+            value = weight,
+            onValueChange = { weight = it },
+            label = { Text("Cân nặng (kg)") },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        OutlinedTextField(
+            value = age,
+            onValueChange = { age = it },
+            label = { Text("Độ tuổi") },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = {},
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            shape = RoundedCornerShape(25.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+        ) {
+            Text(text = "CẬP NHẬT HỒ SƠ", fontWeight = FontWeight.Bold)
+        }
+
+        OutlinedButton(
+            onClick = onLogoutClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            shape = RoundedCornerShape(25.dp)
+        ) {
+            Text(text = "ĐĂNG XUẤT", color = Color(0xFFEF4444), fontWeight = FontWeight.SemiBold)
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewProfile() {
+    ProfileScreen()
+}
+</code></pre>
+          </div>
+
+          <!-- File 3.3: MainActivity.kt (Connect All Navigation) -->
+          <div class="border border-slate-800 rounded-2xl overflow-hidden">
+            <div class="bg-slate-950 px-4 py-3 flex justify-between items-center border-b border-slate-800">
+              <span class="text-xs font-mono font-bold text-slate-300">📁 app/src/main/java/com/example/nutrivision/MainActivity.kt</span>
+              <button onclick="copyCode('code-main')" class="px-3 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg text-xs font-semibold transition">Sao chép code</button>
+            </div>
+            <pre class="p-4 text-xs text-slate-300 overflow-x-auto bg-slate-950/60 max-h-96"><code id="code-main">package com.example.nutrivision
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import com.example.nutrivision.ui.screens.*
+import com.example.nutrivision.ui.theme.NutriVisionTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            NutriVisionTheme {
+                MainApp()
+            }
+        }
+    }
+}
+
+@Composable
+fun MainApp() {
+    // Trạng thái đăng nhập giả lập: Chưa đăng nhập -> hiện AuthScreen; Đăng nhập rồi -> hiện BottomNav
+    var isLoggedIn by remember { mutableStateOf(false) }
+    var selectedTab by remember { mutableStateOf(0) }
+
+    if (!isLoggedIn) {
+        AuthScreen(onLoginSuccess = { isLoggedIn = true })
+    } else {
+        Scaffold(
+            bottomBar = {
+                NavigationBar {
+                    NavigationBarItem(
+                        selected = selectedTab == 0,
+                        onClick = { selectedTab = 0 },
+                        label = { Text("Trang chủ") },
+                        icon = { Text("🏠") }
+                    )
+                    NavigationBarItem(
+                        selected = selectedTab == 1,
+                        onClick = { selectedTab = 1 },
+                        label = { Text("Quét món") },
+                        icon = { Text("📷") }
+                    )
+                    NavigationBarItem(
+                        selected = selectedTab == 2,
+                        onClick = { selectedTab = 2 },
+                        label = { Text("Chi tiết") },
+                        icon = { Text("🍲") }
+                    )
+                    NavigationBarItem(
+                        selected = selectedTab == 3,
+                        onClick = { selectedTab = 3 },
+                        label = { Text("Hồ sơ") },
+                        icon = { Text("👤") }
+                    )
+                }
+            }
+        ) { innerPadding ->
+            Box(modifier = Modifier.padding(innerPadding)) {
+                when (selectedTab) {
+                    0 -> DashboardScreen(onScanClick = { selectedTab = 1 })
+                    1 -> CameraScreen(onCaptureClick = { selectedTab = 2 })
+                    2 -> MealDetailScreen(onSaveClick = { selectedTab = 0 })
+                    3 -> ProfileScreen(onLogoutClick = { isLoggedIn = false })
+                }
+            }
+        }
+    }
+}
+</code></pre>
+          </div>
+        </div>
+
+        <!-- Git Push for TV3 -->
+        <div class="mt-6 bg-slate-950 p-4 rounded-2xl border border-slate-800">
+          <p class="text-xs font-bold text-slate-400 mb-2">🚀 Bước 2: Commit và đẩy lên GitHub:</p>
+          <pre class="text-xs text-emerald-400 bg-slate-900 p-3 rounded-xl overflow-x-auto"><code>git add .
+git commit -m "feat(ui): add auth, profile screens and bottom navigation"
+git push -u origin feature/tv3-auth-profile-navigation</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Final Merge Guide -->
+    <div class="mt-8 bg-slate-900 border border-slate-800 rounded-3xl p-6">
+      <h3 class="text-base font-bold text-white mb-2">🎉 Bước cuối: Thứ tự tạo Pull Request & Merge trên GitHub</h3>
+      <div class="text-xs md:text-sm text-slate-300 space-y-3 leading-relaxed">
+        <p>Để code ghép nối không bị lỗi thiếu file giữa các nhánh, nhóm nên merge theo thứ tự chuẩn sau:</p>
+        <ol class="list-decimal list-inside space-y-2 bg-slate-950 p-4 rounded-2xl border border-slate-800 font-medium">
+          <li><strong class="text-emerald-400">TV1 tạo PR & Merge trước:</strong> Đưa <code>Color.kt</code>, <code>Theme.kt</code> và <code>DashboardScreen.kt</code> vào nhánh <code>main</code>.</li>
+          <li><strong class="text-emerald-400">TV2 tạo PR & Merge tiếp theo:</strong> Đưa <code>CameraScreen.kt</code> và <code>MealDetailScreen.kt</code> vào nhánh <code>main</code>.</li>
+          <li><strong class="text-emerald-400">TV3 kéo code về rồi Merge cuối cùng:</strong>
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;• TV3 gõ <code class="text-emerald-300">git pull origin main</code> vào nhánh của mình để lấy các màn hình của TV1 và TV2 về máy.
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;• Sau đó dán code <code>MainActivity.kt</code> (lúc này Android Studio sẽ nhận đủ tất cả các màn hình mà không báo lỗi đỏ).
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;• Chạy app thử trên máy ảo/điện thoại: kiểm tra luồng Đăng nhập ➔ Trang chủ ➔ Quét món ➔ Chi tiết ➔ Hồ sơ ➔ Đăng xuất mượt mà!
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;• Push lên GitHub và Merge PR cuối cùng.
+          </li>
+        </ol>
+        <p class="text-slate-400 text-xs mt-2">
+          👉 Lúc này nhánh <code class="text-emerald-400 font-mono">main</code> trên GitHub sẽ có trọn vẹn 100% ứng dụng chạy hoàn hảo, và cả 3 bạn đều có lịch sử đóng góp (commit xanh) rõ ràng, minh bạch!
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById('content-' + tabId).classList.remove('hidden');
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-emerald-500', 'text-white', 'shadow-lg', 'shadow-emerald-500/20');
+        btn.classList.add('text-slate-400');
+      });
+      const activeBtn = document.getElementById('tab-' + tabId);
+      activeBtn.classList.add('bg-emerald-500', 'text-white', 'shadow-lg', 'shadow-emerald-500/20');
+      activeBtn.classList.remove('text-slate-400');
+    }
+
+    function copyCode(elementId) {
+      const code = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('Đã sao chép code vào bộ nhớ tạm! Bạn chỉ việc dán (Ctrl + V) vào file trong Android Studio.');
+      });
+    }
+  </script>
+</body>
+</html>
