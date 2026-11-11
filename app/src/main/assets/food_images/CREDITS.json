@@ -1,0 +1,1016 @@
+[
+  {
+    "food_id": "baba_nau_chuoi_dau",
+    "source": "vn-food-combined-2026",
+    "hf_label": "baba-nau-chuoi-dau",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_beo",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-beo",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_bo",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-bo",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_bot_loc",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-bot-loc",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_can",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-can",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_canh",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-canh",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_chung",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-chung",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_cong",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-cong",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_cuon",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-cuon",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_da_cua",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-da-cua",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_duc",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-duc",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_gai",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-gai",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_giay",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-giay",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_gio",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-gio",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_hoi",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-hoi",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_khot",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-khot",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_la",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-la",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_tet",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-tet",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_tieu",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-tieu",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_tom_ho_tay",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-tom-ho-tay",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_trang_nuong",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-trang-nuong",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_troi_nuoc",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-troi-nuoc",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_trung_thu",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-trung-thu",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_u",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-u",
+    "license": "dataset"
+  },
+  {
+    "food_id": "banh_xeo",
+    "source": "vn-food-combined-2026",
+    "hf_label": "banh-xeo",
+    "license": "dataset"
+  },
+  {
+    "food_id": "bo_kho",
+    "source": "vn-food-combined-2026",
+    "hf_label": "bo-kho",
+    "license": "dataset"
+  },
+  {
+    "food_id": "bo_la_lot",
+    "source": "vn-food-combined-2026",
+    "hf_label": "bo-la-lot",
+    "license": "dataset"
+  },
+  {
+    "food_id": "bo_luc_lac",
+    "source": "vn-food-combined-2026",
+    "hf_label": "bo-luc-lac",
+    "license": "dataset"
+  },
+  {
+    "food_id": "bo_ne",
+    "source": "vn-food-combined-2026",
+    "hf_label": "bo-ne",
+    "license": "dataset"
+  },
+  {
+    "food_id": "bun_cha",
+    "source": "vn-food-combined-2026",
+    "hf_label": "bun-cha",
+    "license": "dataset"
+  },
+  {
+    "food_id": "bun_cha_ca",
+    "source": "vn-food-combined-2026",
+    "hf_label": "bun-cha-ca",
+    "license": "dataset"
+  },
+  {
+    "food_id": "bun_dau_mam_tom",
+    "source": "vn-food-combined-2026",
+    "hf_label": "bun-dau-mam-tom",
+    "license": "dataset"
+  },
+  {
+    "food_id": "bun_mam",
+    "source": "vn-food-combined-2026",
+    "hf_label": "bun-mam",
+    "license": "dataset"
+  },
+  {
+    "food_id": "bun_rieu",
+    "source": "vn-food-combined-2026",
+    "hf_label": "bun-rieu",
+    "license": "dataset"
+  },
+  {
+    "food_id": "bun_thit_nuong",
+    "source": "vn-food-combined-2026",
+    "hf_label": "bun-thit-nuong",
+    "license": "dataset"
+  },
+  {
+    "food_id": "ca_kho_to",
+    "source": "vn-food-combined-2026",
+    "hf_label": "ca-kho-to",
+    "license": "dataset"
+  },
+  {
+    "food_id": "ca_loc_nuong",
+    "source": "vn-food-combined-2026",
+    "hf_label": "ca-loc-nuong",
+    "license": "dataset"
+  },
+  {
+    "food_id": "ca_sot_ca_chua",
+    "source": "vn-food-combined-2026",
+    "hf_label": "ca-sot-ca-chua",
+    "license": "dataset"
+  },
+  {
+    "food_id": "canh_bi_do",
+    "source": "vn-food-combined-2026",
+    "hf_label": "canh-bi-do",
+    "license": "dataset"
+  },
+  {
+    "food_id": "canh_chua",
+    "source": "vn-food-combined-2026",
+    "hf_label": "canh-chua",
+    "license": "dataset"
+  },
+  {
+    "food_id": "canh_kho_hoa",
+    "source": "vn-food-combined-2026",
+    "hf_label": "canh-kho-hoa",
+    "license": "dataset"
+  },
+  {
+    "food_id": "canh_khoai_tim",
+    "source": "vn-food-combined-2026",
+    "hf_label": "canh-khoai-tim",
+    "license": "dataset"
+  },
+  {
+    "food_id": "cao_lau",
+    "source": "vn-food-combined-2026",
+    "hf_label": "cao-lau",
+    "license": "dataset"
+  },
+  {
+    "food_id": "cha_ca_la_vong",
+    "source": "vn-food-combined-2026",
+    "hf_label": "cha-ca-la-vong",
+    "license": "dataset"
+  },
+  {
+    "food_id": "cha_lui",
+    "source": "vn-food-combined-2026",
+    "hf_label": "cha-lui",
+    "license": "dataset"
+  },
+  {
+    "food_id": "burrito",
+    "source": "wikimedia",
+    "title": "File:Burrito grande with chicken etc. - Massachusetts.jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Daderot\" title=\"User:Daderot\">Daderot</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Burrito_grande_with_chicken_etc._-_Massachusetts.jpg"
+  },
+  {
+    "food_id": "cha_gio",
+    "source": "wikimedia",
+    "title": "File:Chả giò (Vietnamese Spring Rolls) - 12.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Satdeep_Gill\" title=\"User:Satdeep Gill\">Satdeep Gill</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Ch%E1%BA%A3_gi%C3%B2_(Vietnamese_Spring_Rolls)_-_12.jpg"
+  },
+  {
+    "food_id": "dimsum",
+    "source": "wikimedia",
+    "title": "File:Dim Sum Breakfast.jpg",
+    "license": "CC0",
+    "artist": "<a rel=\"nofollow\" class=\"external text\" href=\"https://pixabay.com/users/afterdog-2454572/\">afterdog</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Dim_Sum_Breakfast.jpg"
+  },
+  {
+    "food_id": "fried_chicken",
+    "source": "wikimedia",
+    "title": "File:Fried-Chicken-Set.jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Evan-Amos\" title=\"User:Evan-Amos\">Evan-Amos</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Fried-Chicken-Set.jpg"
+  },
+  {
+    "food_id": "udon",
+    "source": "wikimedia",
+    "title": "File:Chicken and burdock tempura udon in Sukesan Udon Maebashi-Nishi.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<p><a href=\"//commons.wikimedia.org/wiki/User:IXTA9839\" title=\"User:IXTA9839\">IXTA9839</a><small> </small></p><small> <d",
+    "page": "https://commons.wikimedia.org/wiki/File:Chicken_and_burdock_tempura_udon_in_Sukesan_Udon_Maebashi-Nishi.jpg"
+  },
+  {
+    "food_id": "chao_long",
+    "source": "vn-food-combined-2026",
+    "hf_label": "chao-long",
+    "license": "dataset"
+  },
+  {
+    "food_id": "chao_vit",
+    "source": "vn-food-combined-2026",
+    "hf_label": "chao-vit",
+    "license": "dataset"
+  },
+  {
+    "food_id": "com_chay_cha_bong",
+    "source": "vn-food-combined-2026",
+    "hf_label": "com-chay-cha-bong",
+    "license": "dataset"
+  },
+  {
+    "food_id": "com_ga_xoi_mo",
+    "source": "vn-food-combined-2026",
+    "hf_label": "com-ga-xoi-mo",
+    "license": "dataset"
+  },
+  {
+    "food_id": "com_lam",
+    "source": "vn-food-combined-2026",
+    "hf_label": "com-lam",
+    "license": "dataset"
+  },
+  {
+    "food_id": "com_rang_dua_bo",
+    "source": "vn-food-combined-2026",
+    "hf_label": "com-rang-dua-bo",
+    "license": "dataset"
+  },
+  {
+    "food_id": "com_tam",
+    "source": "vn-food-combined-2026",
+    "hf_label": "com-tam",
+    "license": "dataset"
+  },
+  {
+    "food_id": "cua_hap_bia",
+    "source": "vn-food-combined-2026",
+    "hf_label": "cua-hap-bia",
+    "license": "dataset"
+  },
+  {
+    "food_id": "cut_lon_xao_me",
+    "source": "vn-food-combined-2026",
+    "hf_label": "cut-lon-xao-me",
+    "license": "dataset"
+  },
+  {
+    "food_id": "ga_chien_nuoc_mam",
+    "source": "vn-food-combined-2026",
+    "hf_label": "ga-chien-nuoc-mam",
+    "license": "dataset"
+  },
+  {
+    "food_id": "ga_hap_la_chanh",
+    "source": "vn-food-combined-2026",
+    "hf_label": "ga-hap-la-chanh",
+    "license": "dataset"
+  },
+  {
+    "food_id": "goi_ca_chich",
+    "source": "vn-food-combined-2026",
+    "hf_label": "goi-ca-chich",
+    "license": "dataset"
+  },
+  {
+    "food_id": "goi_cuon",
+    "source": "vn-food-combined-2026",
+    "hf_label": "goi-cuon",
+    "license": "dataset"
+  },
+  {
+    "food_id": "hu_tieu",
+    "source": "vn-food-combined-2026",
+    "hf_label": "hu-tieu",
+    "license": "dataset"
+  },
+  {
+    "food_id": "khau_nhuc",
+    "source": "vn-food-combined-2026",
+    "hf_label": "khau-nhuc",
+    "license": "dataset"
+  },
+  {
+    "food_id": "kho_quet",
+    "source": "vn-food-combined-2026",
+    "hf_label": "kho-quet",
+    "license": "dataset"
+  },
+  {
+    "food_id": "lap_xuong",
+    "source": "vn-food-combined-2026",
+    "hf_label": "lap-xuong",
+    "license": "dataset"
+  },
+  {
+    "food_id": "luon_om_chuoi_dau",
+    "source": "vn-food-combined-2026",
+    "hf_label": "luon-om-chuoi-dau",
+    "license": "dataset"
+  },
+  {
+    "food_id": "luon_xao_xa_ot",
+    "source": "vn-food-combined-2026",
+    "hf_label": "luon-xao-xa-ot",
+    "license": "dataset"
+  },
+  {
+    "food_id": "mam_chung",
+    "source": "vn-food-combined-2026",
+    "hf_label": "mam-chung",
+    "license": "dataset"
+  },
+  {
+    "food_id": "mam_tep_chung_thit",
+    "source": "vn-food-combined-2026",
+    "hf_label": "mam-tep-chung-thit",
+    "license": "dataset"
+  },
+  {
+    "food_id": "mi_quang",
+    "source": "vn-food-combined-2026",
+    "hf_label": "mi-quang",
+    "license": "dataset"
+  },
+  {
+    "food_id": "mi_xao_gion",
+    "source": "vn-food-combined-2026",
+    "hf_label": "mi-xao-gion",
+    "license": "dataset"
+  },
+  {
+    "food_id": "muc_nhoi_thit",
+    "source": "vn-food-combined-2026",
+    "hf_label": "muc-nhoi-thit",
+    "license": "dataset"
+  },
+  {
+    "food_id": "nem_chua",
+    "source": "vn-food-combined-2026",
+    "hf_label": "nem-chua",
+    "license": "dataset"
+  },
+  {
+    "food_id": "nui_xao",
+    "source": "vn-food-combined-2026",
+    "hf_label": "nui-xao",
+    "license": "dataset"
+  },
+  {
+    "food_id": "oc_huong_xao",
+    "source": "vn-food-combined-2026",
+    "hf_label": "oc-huong-xao",
+    "license": "dataset"
+  },
+  {
+    "food_id": "sup_cua",
+    "source": "vn-food-combined-2026",
+    "hf_label": "sup-cua",
+    "license": "dataset"
+  },
+  {
+    "food_id": "bibimbap",
+    "source": "wikimedia",
+    "title": "File:Beef Bibimbap - SAERO 2025-11-06.jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Onthewings\" title=\"User:Onthewings\">Andy Li</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Beef_Bibimbap_-_SAERO_2025-11-06.jpg"
+  },
+  {
+    "food_id": "caesar_salad",
+    "source": "wikimedia",
+    "title": "File:Caesar Salad from Tony Roma Restaurant- March 2024 02.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Banej\" title=\"User:Banej\">Banej</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Caesar_Salad_from_Tony_Roma_Restaurant-_March_2024_02.jpg"
+  },
+  {
+    "food_id": "cheesecake",
+    "source": "wikimedia",
+    "title": "File:New York cheesecake 3.jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:Muago&amp;action=edit&amp;redlink=1\" class=\"new\" title=\"User:Muago (page does not ex",
+    "page": "https://commons.wikimedia.org/wiki/File:New_York_cheesecake_3.jpg"
+  },
+  {
+    "food_id": "chicken_wings",
+    "source": "wikimedia",
+    "title": "File:Golden Salted Egg Chicken Wings - Aberdeen Seafood 2026-01-05.jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Onthewings\" title=\"User:Onthewings\">Andy Li</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Golden_Salted_Egg_Chicken_Wings_-_Aberdeen_Seafood_2026-01-05.jpg"
+  },
+  {
+    "food_id": "club_sandwich",
+    "source": "wikimedia",
+    "title": "File:Classic Club Sandwich, Dôme East Fremantle, 2026 (01).jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Bahnfrend\" title=\"User:Bahnfrend\">Bahnfrend</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Classic_Club_Sandwich,_D%C3%B4me_East_Fremantle,_2026_(01).jpg"
+  },
+  {
+    "food_id": "donut",
+    "source": "wikimedia",
+    "title": "File:Vanilla-iced mini-donut with chocolate sprinkles 1.jpg",
+    "license": "CC BY 2.0",
+    "artist": "James St. John",
+    "page": "https://commons.wikimedia.org/wiki/File:Vanilla-iced_mini-donut_with_chocolate_sprinkles_1.jpg"
+  },
+  {
+    "food_id": "dumplings",
+    "source": "wikimedia",
+    "title": "File:Dumplings at Chinese restaurant in Tokyo Midtown.jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Syced\" title=\"User:Syced\">Syced</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Dumplings_at_Chinese_restaurant_in_Tokyo_Midtown.jpg"
+  },
+  {
+    "food_id": "fish_and_chips",
+    "source": "wikimedia",
+    "title": "File:Buffalo Burgers Fish and Chips (27631056347).jpg",
+    "license": "CC BY-SA 2.0",
+    "artist": "<a rel=\"nofollow\" class=\"external text\" href=\"https://www.flickr.com/people/85567416@N03\">Willis Lam</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Buffalo_Burgers_Fish_and_Chips_(27631056347).jpg"
+  },
+  {
+    "food_id": "french_fries",
+    "source": "wikimedia",
+    "title": "File:French fries 🍟.jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Fumikas_Sagisavas\" title=\"User:Fumikas Sagisavas\">Fumikas Sagisavas</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:French_fries_%F0%9F%8D%9F.jpg"
+  },
+  {
+    "food_id": "greek_salad",
+    "source": "wikimedia",
+    "title": "File:Greek salad and Tzatziki.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Paasikivi\" title=\"User:Paasikivi\">Paasikivi</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Greek_salad_and_Tzatziki.jpg"
+  },
+  {
+    "food_id": "grilled_salmon",
+    "source": "wikimedia",
+    "title": "File:Grilled salmon and asparagus on rice - Boston, Massachusetts.jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Daderot\" title=\"User:Daderot\">Daderot</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Grilled_salmon_and_asparagus_on_rice_-_Boston,_Massachusetts.jpg"
+  },
+  {
+    "food_id": "hamburger",
+    "source": "wikimedia",
+    "title": "File:Cultivated hamburger, 2013.jpg",
+    "license": "CC BY 4.0",
+    "artist": "Mosa Meat",
+    "page": "https://commons.wikimedia.org/wiki/File:Cultivated_hamburger,_2013.jpg"
+  },
+  {
+    "food_id": "onion_rings",
+    "source": "wikimedia",
+    "title": "File:Onion Rings in a glass bowl.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Revital9\" title=\"User:Revital9\">Revital Salomon</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Onion_Rings_in_a_glass_bowl.jpg"
+  },
+  {
+    "food_id": "pad_thai",
+    "source": "wikimedia",
+    "title": "File:Phat Thai kung Chang Khien street stall.jpg",
+    "license": "CC BY-SA 3.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Takeaway\" title=\"User:Takeaway\">Takeaway</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Phat_Thai_kung_Chang_Khien_street_stall.jpg"
+  },
+  {
+    "food_id": "peking_duck",
+    "source": "wikimedia",
+    "title": "File:Peking duck by Mr Wabu in Beijing.jpg",
+    "license": "CC BY-SA 2.0",
+    "artist": "<a rel=\"nofollow\" class=\"external text\" href=\"https://www.flickr.com/photos/oxborrow/\">Mr Wabu</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Peking_duck_by_Mr_Wabu_in_Beijing.jpg"
+  },
+  {
+    "food_id": "pho",
+    "source": "wikimedia",
+    "title": "File:Pho in Russia.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Ctac\" title=\"User:Ctac\">Stanislav Kozlovskiy</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Pho_in_Russia.jpg"
+  },
+  {
+    "food_id": "pizza",
+    "source": "wikimedia",
+    "title": "File:Vegetarian Pizza.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:PetarM\" title=\"User:PetarM\">Petar Milošević</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Vegetarian_Pizza.jpg"
+  },
+  {
+    "food_id": "sashimi",
+    "source": "wikimedia",
+    "title": "File:Sashimi from Tsukiji- hirame, sanma, aji, salmon - Japanese Cuisine by Omae - 2.jpg",
+    "license": "CC BY 2.0",
+    "artist": "T.Tseng",
+    "page": "https://commons.wikimedia.org/wiki/File:Sashimi_from_Tsukiji-_hirame,_sanma,_aji,_salmon_-_Japanese_Cuisine_by_Omae_-_2.jpg"
+  },
+  {
+    "food_id": "spaghetti",
+    "source": "wikimedia",
+    "title": "File:Spaghetti (53257476437) (cropped).png",
+    "license": "CC BY 3.0",
+    "artist": "Choo Yut Shing",
+    "page": "https://commons.wikimedia.org/wiki/File:Spaghetti_(53257476437)_(cropped).png"
+  },
+  {
+    "food_id": "steak",
+    "source": "wikimedia",
+    "title": "File:Steak and potato (2378021458).jpg",
+    "license": "CC BY 2.0",
+    "artist": "<a rel=\"nofollow\" class=\"external text\" href=\"https://www.flickr.com/people/25217744@N06\">Glen Edelson</a> from ATLANTA, USA",
+    "page": "https://commons.wikimedia.org/wiki/File:Steak_and_potato_(2378021458).jpg"
+  },
+  {
+    "food_id": "sushi",
+    "source": "wikimedia",
+    "title": "File:Sushi platter.jpg",
+    "license": "CC BY-SA 2.0",
+    "artist": "<a rel=\"nofollow\" class=\"external text\" href=\"https://www.flickr.com/photos/chidorian/\">chidorian</a> from Japan",
+    "page": "https://commons.wikimedia.org/wiki/File:Sushi_platter.jpg"
+  },
+  {
+    "food_id": "tacos",
+    "source": "wikimedia",
+    "title": "File:Tacos - Tulum QR Feb 2020.jpg",
+    "license": "CC BY-SA 2.0",
+    "artist": "Bernard DUPONT",
+    "page": "https://commons.wikimedia.org/wiki/File:Tacos_-_Tulum_QR_Feb_2020.jpg"
+  },
+  {
+    "food_id": "takoyaki",
+    "source": "wikimedia",
+    "title": "File:Takoyaki - Tora.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:TaronjaSatsuma\" title=\"User:TaronjaSatsuma\">Francesc Fort</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Takoyaki_-_Tora.jpg"
+  },
+  {
+    "food_id": "thit_trau_gac_bep",
+    "source": "wikimedia",
+    "title": "File:Lễ hội ẩm thực Cửa Việt th4n2023 đặc sản Tây Bắc, thịt trâu gác bếp mắc khén (2).jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Ph%C6%B0%C6%A1ng_Huy\" title=\"User:Phương Huy\">Phương Huy</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:L%E1%BB%85_h%E1%BB%99i_%E1%BA%A9m_th%E1%BB%B1c_C%E1%BB%ADa_Vi%E1%BB%87t_th4n2023_%C4%91%E1%BA%B7c_s%E1%BA%A3n_T%C3%A2y_B%E1%BA%AFc,_th%E1%BB%8Bt_tr%C3%A2u_g%C3%A1c_b%E1%BA%BFp_m%E1%BA%AFc_kh%C3%A9n_(2).jpg"
+  },
+  {
+    "food_id": "tiramisu",
+    "source": "wikimedia",
+    "title": "File:Tiramisu birthday cake - 20200124.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Sikander\" title=\"User:Sikander\">Sikander Iqbal</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Tiramisu_birthday_cake_-_20200124.jpg"
+  },
+  {
+    "food_id": "trung_vit_lon",
+    "source": "wikimedia",
+    "title": "File:Hotvitlon.jpg",
+    "license": "CC BY-SA 3.0",
+    "artist": "<a href=\"https://en.wikipedia.org/wiki/vi:User:Aterux\" class=\"extiw\" title=\"w:vi:User:Aterux\">Aterux</a> at <a href=\"https://en.wikipedia.or",
+    "page": "https://commons.wikimedia.org/wiki/File:Hotvitlon.jpg"
+  },
+  {
+    "food_id": "waffles",
+    "source": "wikimedia",
+    "title": "File:Desert Waffles at a restaurant.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:Deborah_Tjituka&amp;action=edit&amp;redlink=1\" class=\"new\" title=\"User:Deborah Tjitu",
+    "page": "https://commons.wikimedia.org/wiki/File:Desert_Waffles_at_a_restaurant.jpg"
+  },
+  {
+    "food_id": "banh_pia",
+    "source": "wikimedia",
+    "title": "File:Bánh pía.JPG",
+    "license": "CC BY-SA 3.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Nguy%E1%BB%85n_Thanh_Quang\" title=\"User:Nguyễn Thanh Quang\">Nguyễn Thanh Quang</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:B%C3%A1nh_p%C3%ADa.JPG"
+  },
+  {
+    "food_id": "banh_tai_heo",
+    "source": "wikimedia",
+    "title": "File:Bánh tai heo trong khay mứt ngày tết.jpg",
+    "license": "Public domain",
+    "artist": "<a href=\"https://vi.wikipedia.org/wiki/User:Ph%C6%B0%C6%A1ng_Huy\" class=\"extiw\" title=\"vi:User:Phương Huy\">Phương Huy</a> (<a href=\"https://",
+    "page": "https://commons.wikimedia.org/wiki/File:B%C3%A1nh_tai_heo_trong_khay_m%E1%BB%A9t_ng%C3%A0y_t%E1%BA%BFt.jpg"
+  },
+  {
+    "food_id": "bun_bo_hue",
+    "source": "wikimedia",
+    "title": "File:Bun Bo Hue 1.jpg",
+    "license": "CC BY 2.0",
+    "artist": "<a rel=\"nofollow\" class=\"external text\" href=\"https://www.flickr.com/photos/91372089@N00\">SauceSupreme</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Bun_Bo_Hue_1.jpg"
+  },
+  {
+    "food_id": "ca_ri_ga",
+    "source": "wikimedia",
+    "title": "File:Cà Ri Gà Vietnamese Chicken Curry 2019-1600.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<bdi><a href=\"https://www.wikidata.org/wiki/Q57979330\" class=\"extiw\" title=\"d:Q57979330\"><span title=\"librarian in Chicago, Illinois\">Paul R",
+    "page": "https://commons.wikimedia.org/wiki/File:C%C3%A0_Ri_G%C3%A0_Vietnamese_Chicken_Curry_2019-1600.jpg"
+  },
+  {
+    "food_id": "lasagna",
+    "source": "wikimedia",
+    "title": "File:Lasagna Indian style.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Nizil_Shah\" title=\"User:Nizil Shah\">Nizil Shah</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Lasagna_Indian_style.jpg"
+  },
+  {
+    "food_id": "pancakes",
+    "source": "wikimedia",
+    "title": "File:Foodiesfeed.com pouring-honey-on-pancakes-with-walnuts.jpg",
+    "license": "CC0",
+    "artist": "Mae Mu",
+    "page": "https://commons.wikimedia.org/wiki/File:Foodiesfeed.com_pouring-honey-on-pancakes-with-walnuts.jpg"
+  },
+  {
+    "food_id": "ramen",
+    "source": "wikimedia",
+    "title": "File:Jin Ramen bowl (spicy) 20210702 002.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:Mobius6&amp;action=edit&amp;redlink=1\" class=\"new\" title=\"User:Mobius6 (page does no",
+    "page": "https://commons.wikimedia.org/wiki/File:Jin_Ramen_bowl_(spicy)_20210702_002.jpg"
+  },
+  {
+    "food_id": "thit_kho_tau",
+    "source": "wikimedia",
+    "title": "File:Thịt kho Tàu.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Viethavvh\" title=\"User:Viethavvh\">Viethavvh</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Th%E1%BB%8Bt_kho_T%C3%A0u.jpg"
+  },
+  {
+    "food_id": "xoi_xeo",
+    "source": "wikimedia",
+    "title": "File:Xôi xéo.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Viethavvh\" title=\"User:Viethavvh\">Viethavvh</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:X%C3%B4i_x%C3%A9o.jpg"
+  },
+  {
+    "food_id": "tempura",
+    "source": "wikimedia",
+    "title": "File:Shrimp and vegetables tempura - Massachusetts.jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Daderot\" title=\"User:Daderot\">Daderot</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Shrimp_and_vegetables_tempura_-_Massachusetts.jpg"
+  },
+  {
+    "food_id": "com_chien",
+    "source": "wikipedia-vi",
+    "title": "Cơm chiên",
+    "file": "Fried_rice_with_chicken_(17234644521).jpg",
+    "license": "CC BY 2.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Fried_rice_with_chicken_(17234644521).jpg"
+  },
+  {
+    "food_id": "macaroni_and_cheese",
+    "source": "wikipedia-en",
+    "title": "Macaroni and cheese",
+    "file": "Original_Mac_n_Cheese_.jpg",
+    "license": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Original_Mac_n_Cheese_.jpg"
+  },
+  {
+    "food_id": "nachos",
+    "source": "wikipedia-en",
+    "title": "Nachos",
+    "file": "Nachos-cheese.jpg",
+    "license": "CC BY 2.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Nachos-cheese.jpg"
+  },
+  {
+    "food_id": "thit_dong",
+    "source": "wikipedia-vi",
+    "title": "Thịt đông",
+    "file": "Pihtije_Cubes_Vlasotince_Bogojavljenje.JPG",
+    "license": "CC BY-SA 3.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Pihtije_Cubes_Vlasotince_Bogojavljenje.JPG"
+  },
+  {
+    "food_id": "xoi_gac",
+    "source": "wikipedia-vi",
+    "title": "Xôi gấc",
+    "file": "Xôi_gấc.JPG",
+    "license": "Public domain",
+    "page": "https://commons.wikimedia.org/wiki/File:X%C3%B4i_g%E1%BA%A5c.JPG"
+  },
+  {
+    "food_id": "banh_mi_chao",
+    "source": "wikimedia",
+    "title": "File:Một phần bánh mì chảo với trứng và chả (38657217774).jpg",
+    "license": "CC BY 2.0",
+    "artist": "<a rel=\"nofollow\" class=\"external text\" href=\"https://www.flickr.com/people/132727482@N05\">Vinnie Cartabiano</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:M%E1%BB%99t_ph%E1%BA%A7n_b%C3%A1nh_m%C3%AC_ch%E1%BA%A3o_v%E1%BB%9Bi_tr%E1%BB%A9ng_v%C3%A0_ch%E1%BA%A3_(38657217774).jpg"
+  },
+  {
+    "food_id": "ca_muoi_xoi",
+    "source": "wikimedia",
+    "title": "File:Vietnamese fried fish (2656425396).jpg",
+    "license": "CC BY-SA 2.0",
+    "artist": "<a rel=\"nofollow\" class=\"external text\" href=\"https://www.flickr.com/people/85936780@N00\">pelican</a> from Tokyo, Japan",
+    "page": "https://commons.wikimedia.org/wiki/File:Vietnamese_fried_fish_(2656425396).jpg"
+  },
+  {
+    "food_id": "canh_cua",
+    "source": "wikimedia",
+    "title": "File:Canh cua khoai sọ rau rút.jpg",
+    "license": "CC BY-SA 3.0",
+    "artist": "<a href=\"https://vi.wikipedia.org/wiki/User:Viethavvh\" class=\"extiw\" title=\"vi:User:Viethavvh\">Viethavvh</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Canh_cua_khoai_s%E1%BB%8D_rau_r%C3%BAt.jpg"
+  },
+  {
+    "food_id": "cha_com",
+    "source": "wikimedia",
+    "title": "File:Cha Com Ha Noi.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:Leduong5004864&amp;action=edit&amp;redlink=1\" class=\"new\" title=\"User:Leduong5004864",
+    "page": "https://commons.wikimedia.org/wiki/File:Cha_Com_Ha_Noi.jpg"
+  },
+  {
+    "food_id": "oc_buou_hap",
+    "source": "wikimedia",
+    "title": "File:Ốc bươu nhồi thịt tại quán Bà Ti ngày 15 tháng 1 năm 2019 (3).jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Ph%C6%B0%C6%A1ng_Huy\" title=\"User:Phương Huy\">Phương Huy</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:%E1%BB%90c_b%C6%B0%C6%A1u_nh%E1%BB%93i_th%E1%BB%8Bt_t%E1%BA%A1i_qu%C3%A1n_B%C3%A0_Ti_ng%C3%A0y_15_th%C3%A1ng_1_n%C4%83m_2019_(3).jpg"
+  },
+  {
+    "food_id": "tau_hu_nhoi_thit",
+    "source": "wikimedia",
+    "title": "File:Hakka-style stuffed tofu at Yunshan Café, Beijing Guangdong Hotel (20240128130539).jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:N509FZ\" title=\"User:N509FZ\">N509FZ</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Hakka-style_stuffed_tofu_at_Yunshan_Caf%C3%A9,_Beijing_Guangdong_Hotel_(20240128130539).jpg"
+  },
+  {
+    "food_id": "tiet_canh",
+    "source": "wikimedia",
+    "title": "File:Tiết canh vịt.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:L%C3%AA_Hu%E1%BB%B3nh_B%E1%BB%99\" title=\"User:Lê Huỳnh Bộ\">Lê Huỳnh Bộ</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Ti%E1%BA%BFt_canh_v%E1%BB%8Bt.jpg"
+  },
+  {
+    "food_id": "croissant",
+    "source": "wikimedia",
+    "title": "File:Chocolate & Almond Croissant - GAIL's Bakery 2025-12-21.jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Onthewings\" title=\"User:Onthewings\">Andy Li</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Chocolate_%26_Almond_Croissant_-_GAIL%27s_Bakery_2025-12-21.jpg"
+  },
+  {
+    "food_id": "kimbap",
+    "source": "wikimedia",
+    "title": "File:Beef kimbap from a DC lunch counter.jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Ser_Amantio_di_Nicolao\" title=\"User:Ser Amantio di Nicolao\">Ser Amantio di Nicolao</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Beef_kimbap_from_a_DC_lunch_counter.jpg"
+  },
+  {
+    "food_id": "milk_tea",
+    "source": "wikimedia",
+    "title": "File:Ice bubble milk tea with tapioca balls of Mister Donut in Japan.jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:%E6%AF%92%E5%B3%B6%E3%81%BF%E3%82%8B%E3%81%8F\" title=\"User:毒島みるく\">毒島みるく</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Ice_bubble_milk_tea_with_tapioca_balls_of_Mister_Donut_in_Japan.jpg"
+  },
+  {
+    "food_id": "pho_bo",
+    "source": "wikimedia",
+    "title": "File:Phở bò, Cầu Giấy, Hà Nội.jpg",
+    "license": "CC BY-SA 3.0",
+    "artist": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:Codename5281&amp;action=edit&amp;redlink=1\" class=\"new\" title=\"User:Codename5281 (pa",
+    "page": "https://commons.wikimedia.org/wiki/File:Ph%E1%BB%9F_b%C3%B2,_C%E1%BA%A7u_Gi%E1%BA%A5y,_H%C3%A0_N%E1%BB%99i.jpg"
+  },
+  {
+    "food_id": "pho_ga",
+    "source": "wikimedia",
+    "title": "File:Homemade \"Phở gà\" by A.jpeg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"https://vi.wikipedia.org/wiki/User:A\" class=\"extiw\" title=\"vi:User:A\"><span style=\"color:#006699;font:\">李</span></a><a href=\"https:",
+    "page": "https://commons.wikimedia.org/wiki/File:Homemade_%22Ph%E1%BB%9F_g%C3%A0%22_by_A.jpeg"
+  },
+  {
+    "food_id": "tom_yum",
+    "source": "wikimedia",
+    "title": "File:Tom yam kung maenam.jpg",
+    "license": "CC BY-SA 3.0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Takeaway\" title=\"User:Takeaway\">Takeaway</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Tom_yam_kung_maenam.jpg"
+  },
+  {
+    "food_id": "tteokbokki",
+    "source": "wikimedia",
+    "title": "File:Korean rice cake (tteokbokki).jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Fumikas_Sagisavas\" title=\"User:Fumikas Sagisavas\">Fumikas Sagisavas</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Korean_rice_cake_(tteokbokki).jpg"
+  },
+  {
+    "food_id": "xoi_ga",
+    "source": "wikimedia",
+    "title": "File:Xôi Gà Trứng Non Lạp Xướng (Sticky rice with chicken and eggs, and chinese sausages).jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:Souradeep.Dasgupta&amp;action=edit&amp;redlink=1\" class=\"new\" title=\"User:Souradeep.",
+    "page": "https://commons.wikimedia.org/wiki/File:X%C3%B4i_G%C3%A0_Tr%E1%BB%A9ng_Non_L%E1%BA%A1p_X%C6%B0%E1%BB%9Bng_(Sticky_rice_with_chicken_and_eggs,_and_chinese_sausages).jpg"
+  },
+  {
+    "food_id": "kho_muc_nuong",
+    "source": "wikimedia",
+    "title": "File:Close-up view of grilled neritic squid in Taipei after New Year's Eve 2015.jpg",
+    "license": "CC BY 2.0",
+    "artist": "Jirka Matousek",
+    "page": "https://commons.wikimedia.org/wiki/File:Close-up_view_of_grilled_neritic_squid_in_Taipei_after_New_Year%27s_Eve_2015.jpg"
+  },
+  {
+    "food_id": "oc_len_xao_dua",
+    "source": "wikimedia",
+    "title": "File:Món ốc xào ở quán Ốc La Cà.JPG",
+    "license": "Public domain",
+    "artist": "<a href=\"https://vi.wikipedia.org/wiki/User:Ph%C6%B0%C6%A1ng_Huy\" class=\"extiw\" title=\"vi:User:Phương Huy\">Phương Huy</a> (<a href=\"https://",
+    "page": "https://commons.wikimedia.org/wiki/File:M%C3%B3n_%E1%BB%91c_x%C3%A0o_%E1%BB%9F_qu%C3%A1n_%E1%BB%90c_La_C%C3%A0.JPG"
+  },
+  {
+    "food_id": "rau_muong_xao",
+    "source": "wikimedia",
+    "title": "File:Rau muống xào tỏi.jpg",
+    "license": "CC BY 2.0",
+    "artist": "<a rel=\"nofollow\" class=\"external text\" href=\"https://www.flickr.com/photos/95172615@N00\">Andy Wright</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Rau_mu%E1%BB%91ng_x%C3%A0o_t%E1%BB%8Fi.jpg"
+  },
+  {
+    "food_id": "xoi_nep_than",
+    "source": "wikimedia",
+    "title": "File:Black Sticky Rice.jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:%E1%80%85%E1%80%AC%E1%80%80%E1%80%9C%E1%80%B1%E1%80%B8_SarKaLay&amp;action=edit&amp;",
+    "page": "https://commons.wikimedia.org/wiki/File:Black_Sticky_Rice.jpg"
+  },
+  {
+    "food_id": "nem_nuong_nha_trang",
+    "source": "wikimedia",
+    "title": "File:Mẹt nem nướng Nha Trang.jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:Letruongan1122&amp;action=edit&amp;redlink=1\" class=\"new\" title=\"User:Letruongan1122",
+    "page": "https://commons.wikimedia.org/wiki/File:M%E1%BA%B9t_nem_n%C6%B0%E1%BB%9Bng_Nha_Trang.jpg"
+  },
+  {
+    "food_id": "tau_hu_non",
+    "source": "wikimedia",
+    "title": "File:Taiwanese douhua.jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Rodelepke\" title=\"User:Rodelepke\">Rodelepke</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Taiwanese_douhua.jpg"
+  },
+  {
+    "food_id": "banh_bao",
+    "source": "wikimedia",
+    "title": "File:Baozi Chengdu.JPG",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Popo_le_Chien\" title=\"User:Popo le Chien\">Popo le Chien</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Baozi_Chengdu.JPG"
+  },
+  {
+    "food_id": "banh_da_lon",
+    "source": "wikimedia",
+    "title": "File:Bánh da lơn đậu xanh và lá dứa..jpg",
+    "license": "CC BY-SA 4.0",
+    "artist": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:Crasheerr&amp;action=edit&amp;redlink=1\" class=\"new\" title=\"User:Crasheerr (page doe",
+    "page": "https://commons.wikimedia.org/wiki/File:B%C3%A1nh_da_l%C6%A1n_%C4%91%E1%BA%ADu_xanh_v%C3%A0_l%C3%A1_d%E1%BB%A9a..jpg"
+  },
+  {
+    "food_id": "banh_mi",
+    "source": "wikimedia",
+    "title": "File:Special Baguette (Bánh mì) - Banh Mi Ancient Saigon 2024-12-20.jpg",
+    "license": "CC0",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Onthewings\" title=\"User:Onthewings\">Andy Li</a>",
+    "page": "https://commons.wikimedia.org/wiki/File:Special_Baguette_(B%C3%A1nh_m%C3%AC)_-_Banh_Mi_Ancient_Saigon_2024-12-20.jpg"
+  },
+  {
+    "food_id": "hot_dog",
+    "source": "wikimedia",
+    "title": "File:Hotdog - Evan Swigart.jpg",
+    "license": "CC BY 2.0",
+    "artist": "<a rel=\"nofollow\" class=\"external text\" href=\"https://www.flickr.com/photos/72949902@N00\">Evan Swigart</a> from Chicago, USA",
+    "page": "https://commons.wikimedia.org/wiki/File:Hotdog_-_Evan_Swigart.jpg"
+  }
+]
