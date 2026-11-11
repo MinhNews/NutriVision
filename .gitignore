@@ -1,15 +1,22 @@
 *.iml
 .gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
+.idea/
 /build
 /captures
 .externalNativeBuild
 .cxx
+.DS_Store
 local.properties
+
+# Android build output
+app/build/
+*.hprof
+
+# Dữ liệu tải thô của công cụ ảnh (không đóng gói vào repo)
+ai_tools/dataset/
+ai_tools/_source/
+ai_tools/_preview/
+ai_tools/_archive/
+
+# Script chạy máy ảo cá nhân (chứa đường dẫn SDK của từng máy)
+CHAY_MAY_AO.bat
