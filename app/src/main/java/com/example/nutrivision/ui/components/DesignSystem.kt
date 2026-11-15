@@ -63,6 +63,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
@@ -530,6 +531,7 @@ fun AppTextField(
     supportingText: String? = null,
     enabled: Boolean = true,
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    imeAction: ImeAction = ImeAction.Next,
 ) {
     OutlinedTextField(
         value = value,
@@ -541,7 +543,7 @@ fun AppTextField(
             { Icon(it, contentDescription = null, tint = PrimaryGreen, modifier = Modifier.size(20.dp)) }
         },
         trailingIcon = trailing,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
         visualTransformation = visualTransformation,
         singleLine = singleLine,
         enabled = enabled,

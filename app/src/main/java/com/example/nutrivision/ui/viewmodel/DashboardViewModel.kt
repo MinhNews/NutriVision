@@ -34,9 +34,8 @@ data class DashboardUiState(
 class DashboardViewModel(
     userRepository: UserRepository,
     mealRepository: MealRepository,
+    private val userId: String,
 ) : ViewModel() {
-
-    private val userId = UserRepository.LOCAL_USER_ID
 
     val uiState: StateFlow<DashboardUiState> = DateUtils.todayFlow()
         .flatMapLatest { today ->

@@ -90,6 +90,7 @@ class MealRepository(
 
     /** Sửa khẩu phần và/hoặc đổi bữa. Trả về meal_id cũ để dọn bữa rỗng. */
     suspend fun updateItem(
+        userId: String,
         itemId: String,
         food: Food,
         grams: Double,
@@ -101,7 +102,7 @@ class MealRepository(
         val targetMeal = if (currentMeal?.mealType == mealType.key) {
             currentMeal
         } else {
-            ensureMeal(currentMeal?.userId ?: UserRepository.LOCAL_USER_ID, currentMeal?.date ?: "", mealType, now)
+            ensureMeal(currentMeal?.userId ?: userId, currentMeal?.date ?: "", mealType, now)
         }
         val nutrition = food.nutritionFor(grams)
         mealDao.updateItem(

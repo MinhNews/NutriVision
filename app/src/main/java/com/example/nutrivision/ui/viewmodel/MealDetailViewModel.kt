@@ -53,6 +53,7 @@ data class MealDetailUiState(
 class MealDetailViewModel(
     private val foodRepository: FoodRepository,
     private val mealRepository: MealRepository,
+    private val userId: String,
     private val foodId: String?,
     private val itemId: String?,
     initialMealType: MealType,
@@ -152,10 +153,10 @@ class MealDetailViewModel(
                 return@launch
             }
             if (state.isEditing && itemId != null) {
-                mealRepository.updateItem(itemId, food, state.grams, state.mealType)
+                mealRepository.updateItem(userId, itemId, food, state.grams, state.mealType)
             } else {
                 mealRepository.addItem(
-                    userId = UserRepository.LOCAL_USER_ID,
+                    userId = userId,
                     date = state.date,
                     mealType = state.mealType,
                     food = food,

@@ -90,7 +90,7 @@ fun ProfileSetupScreen(
         goal: Goal,
     ) -> Unit,
 ) {
-    val email = initial?.email ?: draftEmail
+    val email = draftEmail.ifBlank { initial?.email.orEmpty() }
     var name by remember { mutableStateOf(initial?.displayName ?: draftName) }
     var gender by remember { mutableStateOf(initial?.gender ?: UserProfile.GENDER_MALE) }
     var ageText by remember { mutableStateOf(initial?.age?.toString() ?: "") }

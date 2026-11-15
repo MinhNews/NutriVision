@@ -28,6 +28,8 @@ import androidx.compose.material.icons.rounded.HelpOutline
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Logout
 import androidx.compose.material.icons.rounded.MonitorWeight
+import androidx.compose.material.icons.rounded.Email
+import androidx.compose.material.icons.rounded.Verified
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Translate
@@ -77,6 +79,10 @@ import kotlin.math.roundToInt
 @Composable
 fun ProfileScreen(
     profile: UserProfile,
+    accountEmail: String,
+    emailVerified: Boolean,
+    onResendVerification: () -> Unit,
+    onRefreshVerification: () -> Unit,
     onEditProfile: () -> Unit,
     onLogout: () -> Unit,
 ) {
@@ -228,6 +234,15 @@ fun ProfileScreen(
                     showDivider = false,
                 )
             }
+        }
+
+        item {
+            EmailVerificationCard(
+                email = accountEmail,
+                verified = emailVerified,
+                onResend = onResendVerification,
+                onRefresh = onRefreshVerification,
+            )
         }
 
         item { SectionLabel(tr("CÀI ĐẶT", "SETTINGS")) }
@@ -555,6 +570,70 @@ private fun SettingsRow(
                     .height(1.dp)
                     .background(BorderLight.copy(alpha = 0.8f))
             )
+        }
+    }
+}
+
+@Composable
+private fun EmailVerificationCard(
+    email: String,
+    verified: Boolean,
+    onResend: () -> Unit,
+    onRefresh: () -> Unit,
+) {
+    val tint = if (verified) PrimaryGreen else SecondaryAmber
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(22.dp))
+            .background(if (verified) MintMid.copy(alpha = 0.45f) else SecondaryAmber.copy(alpha = 0.14f))
+            .padding(16.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = if (verified) Icons.Rounded.Verified else Icons.Rounded.Email,
+                contentDescription = null,
+                tint = tint,
+                modifier = Modifier.size(20.dp),
+            )
+            Spacer(Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    if (verified) {
+                        tr("Email đã xác thực", "Email verified")
+                    } else {
+                        tr("Email chưa xác thực", "Email not verified")
+                    },
+                    style = MaterialTheme.typography.titleSmall,
+                    color = TextPrimary,
+                )
+                Text(
+                    email,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+        if (!verified) {
+            Spacer(Modifier.height(6.dp))
+            Text(
+                tr(
+                    "Xác thực email để mở đồng bộ nhiều máy và khôi phục mật khẩu.",
+                    "Verify your email to unlock multi-device sync and password recovery.",
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = TextSecondary,
+            )
+            Row {
+                TextButton(onClick = onResend) {
+                    Text(tr("Gửi lại link", "Resend link"), color = PrimaryGreen)
+                }
+                TextButton(onClick = onRefresh) {
+                    Text(tr("Tôi đã xác thực", "I have verified"), color = PrimaryGreen)
+                }
+            }
         }
     }
 }

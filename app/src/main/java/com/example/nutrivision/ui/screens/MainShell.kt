@@ -37,9 +37,12 @@ import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,6 +81,7 @@ import com.example.nutrivision.ui.theme.SurfaceLight
 import com.example.nutrivision.ui.theme.TextMuted
 import com.example.nutrivision.ui.theme.TextSecondary
 import com.example.nutrivision.ui.util.SystemBarsAppearance
+import com.example.nutrivision.ui.viewmodel.AuthMessage
 import com.example.nutrivision.ui.viewmodel.DashboardViewModel
 import com.example.nutrivision.ui.viewmodel.DiaryViewModel
 import com.example.nutrivision.ui.viewmodel.MealDetailViewModel
@@ -88,6 +92,12 @@ import com.example.nutrivision.ui.viewmodel.StatsViewModel
 fun MainShell(
     container: AppContainer,
     profile: UserProfile,
+    accountEmail: String,
+    emailVerified: Boolean,
+    message: AuthMessage?,
+    onClearMessage: () -> Unit,
+    onResendVerification: () -> Unit,
+    onRefreshVerification: () -> Unit,
     onLogout: () -> Unit,
     onSaveProfile: (
         email: String,
@@ -112,17 +122,17 @@ fun MainShell(
 
     val dashboardViewModel: DashboardViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { DashboardViewModel(container.userRepository, container.mealRepository) }
+            initializer { DashboardViewModel(container.userRepository, container.mealRepository, profile.userId) }
         }
     )
     val diaryViewModel: DiaryViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { DiaryViewModel(container.userRepository, container.mealRepository) }
+            initializer { DiaryViewModel(container.userRepository, container.mealRepository, profile.userId) }
         }
     )
     val statsViewModel: StatsViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { StatsViewModel(container.userRepository, container.mealRepository) }
+            initializer { StatsViewModel(container.userRepository, container.mealRepository, profile.userId) }
         }
     )
 
@@ -131,6 +141,14 @@ fun MainShell(
     val statsState by statsViewModel.uiState.collectAsStateWithLifecycle()
 
     BackHandler(enabled = overlay != null) { overlay = null }
+
+    // Thong bao ngan (gui lai link xac thuc, loi mang...) hien o day vi tab Ca nhan khong co cho rieng.
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(message) {
+        val current = message ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(current.text)
+        onClearMessage()
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         AppBackground {
@@ -190,6 +208,10 @@ fun MainShell(
 
                         AppTab.PROFILE -> ProfileScreen(
                             profile = profile,
+                            accountEmail = accountEmail,
+                            emailVerified = emailVerified,
+                            onResendVerification = onResendVerification,
+                            onRefreshVerification = onRefreshVerification,
                             onEditProfile = { overlay = Route.EditProfile },
                             onLogout = onLogout,
                         )
@@ -197,6 +219,14 @@ fun MainShell(
                 }
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(start = 16.dp, end = 16.dp, bottom = 96.dp),
+        )
 
         AnimatedContent(
             targetState = overlay,
@@ -248,6 +278,7 @@ fun MainShell(
                                         MealDetailViewModel(
                                             foodRepository = container.foodRepository,
                                             mealRepository = container.mealRepository,
+                                            userId = profile.userId,
                                             foodId = route.foodId,
                                             itemId = route.itemId,
                                             initialMealType = route.mealType,
@@ -274,7 +305,7 @@ fun MainShell(
                         Route.EditProfile -> {
                             ProfileSetupScreen(
                                 initial = profile,
-                                draftEmail = profile.email,
+                                draftEmail = accountEmail,
                                 draftName = profile.displayName.orEmpty(),
                                 canGoBack = true,
                                 onBack = { overlay = null },

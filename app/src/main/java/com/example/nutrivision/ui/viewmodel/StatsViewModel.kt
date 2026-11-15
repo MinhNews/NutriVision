@@ -46,9 +46,9 @@ data class StatsUiState(
 class StatsViewModel(
     userRepository: UserRepository,
     mealRepository: MealRepository,
+    private val userId: String,
 ) : ViewModel() {
 
-    private val userId = UserRepository.LOCAL_USER_ID
     private val _range = MutableStateFlow(StatsRange.WEEK)
     private val _month = MutableStateFlow(DateUtils.firstOfMonth(DateUtils.todayKey()))
     private val _today = MutableStateFlow(DateUtils.todayKey())
