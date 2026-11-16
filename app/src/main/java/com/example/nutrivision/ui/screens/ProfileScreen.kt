@@ -1,5 +1,11 @@
 package com.example.nutrivision.ui.screens
 
+import android.Manifest
+import android.app.TimePickerDialog
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import com.example.nutrivision.domain.text.tr
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,6 +29,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.CloudSync
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.HelpOutline
 import androidx.compose.material.icons.rounded.Info
@@ -36,6 +43,7 @@ import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -49,14 +57,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.example.nutrivision.domain.model.UserProfile
+import androidx.core.content.ContextCompat
+import com.example.nutrivision.BuildConfig
 import com.example.nutrivision.data.prefs.AppLanguage
+import com.example.nutrivision.data.prefs.ReminderState
 import com.example.nutrivision.data.prefs.ThemeMode
 import com.example.nutrivision.data.prefs.displayName
+import com.example.nutrivision.domain.model.UserProfile
+import com.example.nutrivision.notifications.MealSlot
 import com.example.nutrivision.ui.components.GlassCard
 import com.example.nutrivision.ui.theme.BorderLight
 import com.example.nutrivision.ui.theme.ForestDeep
@@ -74,6 +87,9 @@ import com.example.nutrivision.ui.theme.TextSecondary
 import com.example.nutrivision.ui.text.LocalLanguageController
 import com.example.nutrivision.ui.util.grouped
 import com.example.nutrivision.ui.util.oneDecimal
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.math.roundToInt
 
 @Composable
@@ -81,6 +97,12 @@ fun ProfileScreen(
     profile: UserProfile,
     accountEmail: String,
     emailVerified: Boolean,
+    syncing: Boolean,
+    lastSyncAt: Long,
+    syncError: String?,
+    reminders: ReminderState,
+    onSetReminderEnabled: (MealSlot, Boolean) -> Unit,
+    onSetReminderTime: (MealSlot, Int, Int) -> Unit,
     onResendVerification: () -> Unit,
     onRefreshVerification: () -> Unit,
     onEditProfile: () -> Unit,
@@ -90,6 +112,28 @@ fun ProfileScreen(
     val languageController = LocalLanguageController.current
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showReminderDialog by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    // Bữa đang chờ cấp quyền thông báo (để bật lại đúng bữa đó sau khi người dùng đồng ý).
+    var pendingSlot by remember { mutableStateOf(MealSlot.BREAKFAST) }
+
+    // Từ Android 13 thông báo cần quyền runtime - xin đúng lúc người dùng bật nhắc nhở.
+    val notificationPermission = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted -> if (granted) onSetReminderEnabled(pendingSlot, true) }
+
+    fun changeReminder(slot: MealSlot, enabled: Boolean) {
+        val needsPermission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        if (enabled && needsPermission) {
+            pendingSlot = slot
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            onSetReminderEnabled(slot, enabled)
+        }
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -231,6 +275,23 @@ fun ProfileScreen(
                     title = tr("Chỉ số BMI", "BMI"),
                     value = "${profile.bmi.oneDecimal()} · ${profile.bmiLabel}",
                     valueColor = SecondaryAmber,
+                )
+                SettingsRow(
+                    icon = Icons.Rounded.CloudSync,
+                    title = tr("Đồng bộ", "Sync"),
+                    value = when {
+                        syncing -> tr("Đang đồng bộ…", "Syncing…")
+                        syncError != null -> tr("Lỗi đồng bộ", "Sync error")
+                        lastSyncAt <= 0L -> tr("Chưa đồng bộ", "Not synced")
+                        else -> syncLabel(lastSyncAt)
+                    },
+                    valueColor = if (syncError != null) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        PrimaryGreen
+                    },
+                    note = syncError,
+                    noteColor = MaterialTheme.colorScheme.error,
                     showDivider = false,
                 )
             }
@@ -265,7 +326,9 @@ fun ProfileScreen(
                 SettingsRow(
                     icon = Icons.Rounded.NotificationsActive,
                     title = tr("Nhắc nhở giờ ăn", "Meal reminders"),
-                    value = tr("Sắp có", "Coming soon"),
+                    value = reminders.enabledTimesLabel ?: tr("Tắt", "Off"),
+                    valueColor = if (reminders.anyEnabled) PrimaryGreen else TextSecondary,
+                    onClick = { showReminderDialog = true },
                 )
                 SettingsRow(
                     icon = Icons.Rounded.Translate,
@@ -290,14 +353,12 @@ fun ProfileScreen(
                 contentPadding = PaddingValues(vertical = 4.dp),
             ) {
                 SettingsRow(
-                    icon = Icons.Rounded.HelpOutline,
-                    title = tr("Trợ giúp & phản hồi", "Help & feedback"),
-                    value = tr("Sắp có", "Coming soon"),
-                )
-                SettingsRow(
                     icon = Icons.Rounded.Info,
                     title = tr("Về NutriVision", "About NutriVision"),
-                    value = tr("Phiên bản 1.0", "Version 1.0"),
+                    value = tr(
+                        "Phiên bản ${BuildConfig.VERSION_NAME}",
+                        "Version ${BuildConfig.VERSION_NAME}",
+                    ),
                     showDivider = false,
                 )
             }
@@ -362,6 +423,89 @@ fun ProfileScreen(
             onDismiss = { showLanguageDialog = false },
         )
     }
+
+    if (showReminderDialog) {
+        ReminderDialog(
+            state = reminders,
+            onToggle = ::changeReminder,
+            onTimeChange = onSetReminderTime,
+            onDismiss = { showReminderDialog = false },
+        )
+    }
+}
+
+/**
+ * Hộp thoại chỉnh nhắc nhở: mỗi bữa một công tắc và một nút giờ.
+ * Bấm vào giờ mở TimePicker của hệ thống (đồng hồ 24 giờ) - không cần tự vẽ.
+ */
+@Composable
+private fun ReminderDialog(
+    state: ReminderState,
+    onToggle: (MealSlot, Boolean) -> Unit,
+    onTimeChange: (MealSlot, Int, Int) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val context = LocalContext.current
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(tr("Nhắc nhở giờ ăn", "Meal reminders")) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    tr(
+                        "Chọn giờ cho từng bữa. Bữa nào hôm nay đã ghi rồi thì app không nhắc nữa.",
+                        "Pick a time per meal. If that meal is already logged today, we stay quiet.",
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondary,
+                )
+                state.slots.forEach { setting ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                setting.slot.label,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextPrimary,
+                            )
+                            TextButton(
+                                onClick = {
+                                    TimePickerDialog(
+                                        context,
+                                        { _, hour, minute ->
+                                            onTimeChange(setting.slot, hour, minute)
+                                        },
+                                        setting.hour,
+                                        setting.minute,
+                                        true,
+                                    ).show()
+                                },
+                                contentPadding = PaddingValues(0.dp),
+                            ) {
+                                Text(
+                                    setting.timeLabel,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = if (setting.enabled) PrimaryGreen else TextMuted,
+                                )
+                            }
+                        }
+                        Switch(
+                            checked = setting.enabled,
+                            onCheckedChange = { onToggle(setting.slot, it) },
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(tr("Xong", "Done")) }
+        },
+    )
 }
 
 @Composable
@@ -515,6 +659,8 @@ private fun SettingsRow(
     value: String?,
     onClick: (() -> Unit)? = null,
     valueColor: Color = TextSecondary,
+    note: String? = null,
+    noteColor: Color = TextSecondary,
     showDivider: Boolean = true,
 ) {
     Column {
@@ -561,6 +707,14 @@ private fun SettingsRow(
                     modifier = Modifier.size(17.dp),
                 )
             }
+        }
+        if (note != null) {
+            Text(
+                note,
+                style = MaterialTheme.typography.labelSmall,
+                color = noteColor,
+                modifier = Modifier.padding(start = 59.dp, end = 14.dp, bottom = 10.dp),
+            )
         }
         if (showDivider) {
             Box(
@@ -620,8 +774,8 @@ private fun EmailVerificationCard(
             Spacer(Modifier.height(6.dp))
             Text(
                 tr(
-                    "Xác thực email để mở đồng bộ nhiều máy và khôi phục mật khẩu.",
-                    "Verify your email to unlock multi-device sync and password recovery.",
+                    "Xác thực email để bảo vệ tài khoản và khôi phục mật khẩu khi quên.",
+                    "Verify your email to protect your account and recover a forgotten password.",
                 ),
                 style = MaterialTheme.typography.bodySmall,
                 color = TextSecondary,
@@ -637,6 +791,13 @@ private fun EmailVerificationCard(
         }
     }
 }
+
+private fun syncLabel(lastSyncAt: Long): String =
+    if (lastSyncAt <= 0L) {
+        tr("Chưa đồng bộ", "Not synced")
+    } else {
+        SimpleDateFormat("dd/MM HH:mm", Locale.US).format(Date(lastSyncAt))
+    }
 
 private fun initialsOf(name: String): String {
     val parts = name.trim().split(" ").filter { it.isNotBlank() }

@@ -54,6 +54,9 @@ class MealRepository(
         food: Food,
         grams: Double,
         note: String? = null,
+        source: String = MealItemEntity.SOURCE_USER,
+        confidence: Double? = null,
+        photoUri: String? = null,
     ): String = db.withTransaction {
         val now = System.currentTimeMillis()
         val meal = ensureMeal(userId, date, mealType, now)
@@ -72,10 +75,10 @@ class MealRepository(
             fat = nutrition.fat,
             fiber = nutrition.fiber,
             sodiumMg = nutrition.sodiumMg,
-            source = MealItemEntity.SOURCE_USER,
-            confidence = null,
+            source = source,
+            confidence = confidence,
             confirmed = 1,
-            photoUri = null,
+            photoUri = photoUri,
             sortOrder = sortOrder,
             createdAt = now,
             updatedAt = now,
@@ -175,8 +178,10 @@ class MealRepository(
     }
 
     private suspend fun removeMealIfEmpty(mealId: String, now: Long) {
+        // Xoa mem de may khac biet ma xoa theo (tombstone), va de co the hoi sinh
+        // dung dong cu neu ngay hom do lai duoc them mon (UNIQUE user+date+meal_type).
         if (mealDao.countActiveItems(mealId) == 0) {
-            mealDao.hardDeleteMeal(mealId)
+            mealDao.softDeleteMeal(mealId, now)
         }
     }
 }

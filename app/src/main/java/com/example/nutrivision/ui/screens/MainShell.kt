@@ -82,7 +82,11 @@ import com.example.nutrivision.ui.theme.TextMuted
 import com.example.nutrivision.ui.theme.TextSecondary
 import com.example.nutrivision.ui.util.SystemBarsAppearance
 import com.example.nutrivision.ui.viewmodel.AuthMessage
+import com.example.nutrivision.ui.viewmodel.CameraViewModel
+import com.example.nutrivision.ui.viewmodel.defaultMealType
 import com.example.nutrivision.ui.viewmodel.DashboardViewModel
+import com.example.nutrivision.data.prefs.ReminderState
+import com.example.nutrivision.notifications.MealSlot
 import com.example.nutrivision.ui.viewmodel.DiaryViewModel
 import com.example.nutrivision.ui.viewmodel.MealDetailViewModel
 import com.example.nutrivision.ui.viewmodel.SearchViewModel
@@ -94,6 +98,12 @@ fun MainShell(
     profile: UserProfile,
     accountEmail: String,
     emailVerified: Boolean,
+    syncing: Boolean,
+    lastSyncAt: Long,
+    syncError: String?,
+    reminders: ReminderState,
+    onSetReminderEnabled: (MealSlot, Boolean) -> Unit,
+    onSetReminderTime: (MealSlot, Int, Int) -> Unit,
     message: AuthMessage?,
     onClearMessage: () -> Unit,
     onResendVerification: () -> Unit,
@@ -135,6 +145,20 @@ fun MainShell(
             initializer { StatsViewModel(container.userRepository, container.mealRepository, profile.userId) }
         }
     )
+    val cameraViewModel: CameraViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer {
+                CameraViewModel(
+                    userId = profile.userId,
+                    foodRepository = container.foodRepository,
+                    mealRepository = container.mealRepository,
+                    classifier = container.foodClassifier,
+                    gemini = container.geminiFoodService,
+                )
+            }
+        }
+    )
+    val cameraState by cameraViewModel.uiState.collectAsStateWithLifecycle()
 
     val dashboardState by dashboardViewModel.uiState.collectAsStateWithLifecycle()
     val diaryState by diaryViewModel.uiState.collectAsStateWithLifecycle()
@@ -195,7 +219,10 @@ fun MainShell(
                         )
 
                         AppTab.CAMERA -> CameraScreen(
-                            onSearchClick = { overlay = Route.Search(MealType.LUNCH) },
+                            viewModel = cameraViewModel,
+                            uiState = cameraState,
+                            onOpenSearch = { overlay = Route.Search(defaultMealType()) },
+                            onOpenDiary = { tabName = AppTab.DIARY.name },
                         )
 
                         AppTab.STATS -> StatsScreen(
@@ -210,6 +237,12 @@ fun MainShell(
                             profile = profile,
                             accountEmail = accountEmail,
                             emailVerified = emailVerified,
+                            syncing = syncing,
+                            lastSyncAt = lastSyncAt,
+                            syncError = syncError,
+                            reminders = reminders,
+                            onSetReminderEnabled = onSetReminderEnabled,
+                            onSetReminderTime = onSetReminderTime,
                             onResendVerification = onResendVerification,
                             onRefreshVerification = onRefreshVerification,
                             onEditProfile = { overlay = Route.EditProfile },

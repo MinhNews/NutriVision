@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +34,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -119,6 +123,10 @@ private fun NutriVisionRoot(container: AppContainer) {
                     sessionManager = container.sessionManager,
                     authRepository = container.authRepository,
                     localDataStore = container.localDataStore,
+                    database = container.database,
+                    firestoreSync = container.firestoreSync,
+                    reminderSettings = container.reminderSettings,
+                    reminderScheduler = container.reminderScheduler,
                     foodRepository = container.foodRepository,
                 )
             }
@@ -132,6 +140,20 @@ private fun NutriVisionRoot(container: AppContainer) {
     val busy by appViewModel.busy.collectAsStateWithLifecycle()
     val message by appViewModel.message.collectAsStateWithLifecycle()
     val emailVerified by appViewModel.emailVerified.collectAsStateWithLifecycle()
+    val syncing by appViewModel.syncing.collectAsStateWithLifecycle()
+    val lastSyncAt by appViewModel.lastSyncAt.collectAsStateWithLifecycle()
+    val syncError by appViewModel.lastSyncError.collectAsStateWithLifecycle()
+    val reminders by appViewModel.reminders.collectAsStateWithLifecycle()
+
+    // Quay lại app sau một lúc: dữ liệu máy khác có thể đã đổi, đồng bộ lại trong im lặng.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START) appViewModel.onAppForeground()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     if (!onboardingCompleted) {
         SystemBarsAppearance(useDarkIcons = false)
@@ -199,6 +221,12 @@ private fun NutriVisionRoot(container: AppContainer) {
                         profile = currentProfile,
                         accountEmail = state.email,
                         emailVerified = emailVerified,
+                        syncing = syncing,
+                        lastSyncAt = lastSyncAt,
+                        syncError = syncError,
+                        reminders = reminders,
+                        onSetReminderEnabled = appViewModel::setReminderEnabled,
+                        onSetReminderTime = appViewModel::setReminderTime,
                         message = message,
                         onClearMessage = appViewModel::clearMessage,
                         onResendVerification = appViewModel::resendVerification,

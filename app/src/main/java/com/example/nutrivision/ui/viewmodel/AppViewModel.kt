@@ -5,7 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.nutrivision.data.auth.AuthRepository
 import com.example.nutrivision.data.auth.AuthResult
 import com.example.nutrivision.data.local.LocalDataStore
+import com.example.nutrivision.data.local.NutriVisionDatabase
+import com.example.nutrivision.data.prefs.ReminderSettings
+import com.example.nutrivision.data.prefs.ReminderState
 import com.example.nutrivision.data.prefs.SessionManager
+import com.example.nutrivision.data.remote.FirestoreSync
 import com.example.nutrivision.data.repository.FoodRepository
 import com.example.nutrivision.data.repository.UserRepository
 import com.example.nutrivision.domain.calc.NutritionCalculator
@@ -13,19 +17,28 @@ import com.example.nutrivision.domain.model.ActivityLevel
 import com.example.nutrivision.domain.model.Goal
 import com.example.nutrivision.domain.model.UserProfile
 import com.example.nutrivision.domain.text.tr
+import com.example.nutrivision.notifications.MealSlot
+import com.example.nutrivision.notifications.ReminderScheduler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** Trang thai phien dang nhap. Firebase la nguon su that, khong con co "logged_in" gia. */
 sealed interface AuthState {
@@ -48,6 +61,10 @@ class AppViewModel(
     private val sessionManager: SessionManager,
     private val authRepository: AuthRepository,
     private val localDataStore: LocalDataStore,
+    private val database: NutriVisionDatabase,
+    private val firestoreSync: FirestoreSync,
+    private val reminderSettings: ReminderSettings,
+    private val reminderScheduler: ReminderScheduler,
     foodRepository: FoodRepository,
 ) : ViewModel() {
 
@@ -65,6 +82,19 @@ class AppViewModel(
     private val _message = MutableStateFlow<AuthMessage?>(null)
     val message: StateFlow<AuthMessage?> = _message.asStateFlow()
 
+    /** Đang chạy đồng bộ Firestore - hiện "Đang đồng bộ…" ở tab Cá nhân. */
+    private val _syncing = MutableStateFlow(false)
+    val syncing: StateFlow<Boolean> = _syncing.asStateFlow()
+
+    /** Lần đồng bộ thành công gần nhất, hiện ở tab Cá nhân. */
+    val lastSyncAt: StateFlow<Long> = sessionManager.lastSyncAt
+
+    /** Lỗi đồng bộ tự động gần nhất (null nếu lần cuối thành công). */
+    val lastSyncError: StateFlow<String?> = sessionManager.lastSyncError
+
+    /** Giờ nhắc người dùng đã chọn cho từng bữa. */
+    val reminders: StateFlow<ReminderState> = reminderSettings.state
+
     private data class UserData(val profile: UserProfile?, val loaded: Boolean)
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -79,6 +109,17 @@ class AppViewModel(
                     // Ho so cu co the mang email khac (vi du email go tay o tuan 3). Tu tuan 4,
                     // email cua tai khoan Firebase la nguon su that nen dong bo lai mot lan.
                     healProfileEmail(user.uid, user.email.orEmpty())
+                    // Đồng bộ xong rồi mới phát dữ liệu: máy thứ hai đăng nhập lần đầu sẽ thấy
+                    // ngay hồ sơ cũ thay vì bắt người dùng nhập lại rồi mới bị ghi đè.
+                    // Giới hạn 6 giây để mở app không bị treo khi mạng chậm.
+                    val outcome = withTimeoutOrNull(SYNC_ON_START_TIMEOUT_MS) {
+                        runCatching { firestoreSync.sync(user.uid) }.getOrNull()
+                    }
+                    if (outcome?.success == true) {
+                        sessionManager.markSynced(outcome.finishedAt)
+                    } else if (outcome != null) {
+                        sessionManager.markSyncFailed(outcome.message)
+                    }
                     emitAll(userRepository.observeProfile(user.uid).map { UserData(it, true) })
                 }
             }
@@ -111,8 +152,73 @@ class AppViewModel(
                     )
                 }
                 _emailVerified.value = user?.isEmailVerified == true
-                if (user == null) _busy.value = false
+                if (user == null) {
+                    _busy.value = false
+                } else {
+                    // Mỗi lần mở app: bảo đảm lịch nhắc còn đúng (WorkManager giữ lịch qua reboot).
+                    runCatching { reminderScheduler.sync() }
+                }
             }
+        }
+        startAutoSync()
+    }
+
+    /**
+     * Đồng bộ tự động: không có nút bấm tay.
+     *
+     * Nghe "vân tay" (số dòng + updated_at mới nhất) của hồ sơ, bữa và món trong Room.
+     * Gộp các thao tác liên tiếp bằng debounce 2 giây rồi đẩy lên Firestore. Việc đồng bộ
+     * chỉ đổi `sync_status` chứ không đổi `updated_at` nên không tự kích hoạt lại.
+     * Lần phát đầu tiên sau khi đăng nhập bị bỏ qua vì đã có đồng bộ lúc mở app.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+    private fun startAutoSync() {
+        viewModelScope.launch {
+            authRepository.observeAuthState()
+                .map { it?.uid }
+                .distinctUntilChanged()
+                .flatMapLatest { userId ->
+                    if (userId == null) {
+                        flowOf(null)
+                    } else {
+                        merge(
+                            database.mealDao().observeMealFingerprint(userId),
+                            database.mealDao().observeItemFingerprint(userId),
+                            database.userDao().observeFingerprint(userId),
+                        )
+                            .distinctUntilChanged()
+                            .debounce(SYNC_DEBOUNCE_MS)
+                            .drop(1)
+                            .map { userId }
+                    }
+                }
+                .filterNotNull()
+                .collect { userId -> sync(userId) }
+        }
+    }
+
+    /** Gọi khi app quay lại foreground: dữ liệu máy khác có thể đã đổi. */
+    fun onAppForeground() {
+        val userId = authRepository.currentUserId ?: return
+        val sinceLast = System.currentTimeMillis() - sessionManager.lastSyncAt.value
+        if (sinceLast < FOREGROUND_SYNC_INTERVAL_MS) return
+        viewModelScope.launch { sync(userId) }
+    }
+
+    private suspend fun sync(userId: String) {
+        if (_syncing.value) return
+        _syncing.value = true
+        val outcome = runCatching { firestoreSync.sync(userId) }.getOrNull()
+        _syncing.value = false
+        if (outcome?.success == true) {
+            sessionManager.markSynced(outcome.finishedAt)
+        } else {
+            sessionManager.markSyncFailed(
+                outcome?.message ?: tr(
+                    "Không kết nối được máy chủ đồng bộ.",
+                    "Could not reach the sync server.",
+                )
+            )
         }
     }
 
@@ -120,6 +226,18 @@ class AppViewModel(
 
     fun clearMessage() {
         _message.value = null
+    }
+
+    /** Bật/tắt nhắc cho một bữa; WorkManager giữ lịch kể cả khi tắt app. */
+    fun setReminderEnabled(slot: MealSlot, enabled: Boolean) {
+        reminderSettings.setEnabled(slot, enabled)
+        reminderScheduler.sync()
+    }
+
+    /** Đổi giờ nhắc của một bữa. */
+    fun setReminderTime(slot: MealSlot, hour: Int, minute: Int) {
+        reminderSettings.setTime(slot, hour, minute)
+        reminderScheduler.sync()
     }
 
     /** Dong bo email trong ho so ve email cua tai khoan Firebase (mot lan, khi email khac nhau). */
@@ -268,6 +386,17 @@ class AppViewModel(
             userRepository.saveProfile(profile)
             onSaved()
         }
+    }
+
+    private companion object {
+        /** Không để màn hình chờ phụ thuộc vào mạng: quá 6 giây thì vào app bằng dữ liệu máy. */
+        const val SYNC_ON_START_TIMEOUT_MS = 6_000L
+
+        /** Gộp các thao tác liên tiếp (thêm 3 món = 1 lần đồng bộ) trước khi đẩy lên Firestore. */
+        const val SYNC_DEBOUNCE_MS = 2_000L
+
+        /** Quay lại app sau 5 phút thì kéo dữ liệu máy khác về. */
+        const val FOREGROUND_SYNC_INTERVAL_MS = 5 * 60_000L
     }
 }
 
