@@ -146,7 +146,8 @@ class GeminiFoodService(
     }
 
     private fun post(payload: String): HttpResponse {
-        val url = URL("$ENDPOINT?key=$apiKey")
+        // Phải có "/{model}:generateContent", thiếu đoạn này thì API trả 404 dù khoá đúng.
+        val url = URL("$ENDPOINT/$model:generateContent?key=$apiKey")
         val connection = (url.openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             connectTimeout = 20_000
