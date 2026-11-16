@@ -2,8 +2,10 @@ package com.example.nutrivision.ui.screens
 
 import android.Manifest
 import android.app.TimePickerDialog
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import com.example.nutrivision.domain.text.tr
@@ -63,6 +65,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.app.NotificationManagerCompat
 import com.example.nutrivision.BuildConfig
 import com.example.nutrivision.data.prefs.AppLanguage
 import com.example.nutrivision.data.prefs.ReminderState
@@ -460,6 +463,29 @@ private fun ReminderDialog(
                     style = MaterialTheme.typography.bodySmall,
                     color = TextSecondary,
                 )
+                // Nhắc nhở chỉ có tác dụng khi hệ điều hành cho phép thông báo - nói rõ thay vì im lặng.
+                if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+                    Text(
+                        tr(
+                            "Thông báo đang bị tắt cho NutriVision nên nhắc nhở sẽ không hiện.",
+                            "Notifications are turned off for NutriVision, so reminders will not appear.",
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                    TextButton(
+                        contentPadding = PaddingValues(0.dp),
+                        onClick = {
+                            context.startActivity(
+                                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                    .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            )
+                        },
+                    ) {
+                        Text(tr("Mở cài đặt thông báo", "Open notification settings"))
+                    }
+                }
                 state.slots.forEach { setting ->
                     Row(
                         modifier = Modifier

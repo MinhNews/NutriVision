@@ -12,9 +12,9 @@
 | Đăng nhập | Nút bấm vào là xong, `user_id = "local"` | **Firebase Auth thật** (email + mật khẩu), `user_id = Firebase UID`, có xác thực email, điều khoản, nhập lại mật khẩu |
 | Dữ liệu tuần 3 | Nằm dưới `user_id = "local"` | **Tự nhận vào tài khoản thật** khi email hồ sơ cũ trùng email đăng nhập (`LegacyAdoption.emailMatches`); không trùng thì để riêng, không trộn |
 | Camera | Chip "Sắp có" | **CameraX chụp thật** + **TFLite chạy trên máy** nhận diện món, top-3 kèm độ tin cậy |
-| Mô tả món bằng AI | Chưa có | Nút **"Nhờ AI mô tả"** gọi Gemini, trả về món + khẩu phần + dinh dưỡng, lưu thành món riêng (`is_custom = 1`) |
+| Mô tả món bằng AI | Chưa có | Nút **"Nhờ AI mô tả"** gọi Gemini, trả về món + khẩu phần + dinh dưỡng, lưu thành món riêng (`is_custom = 1`). Thêm **"Chọn ảnh có sẵn"** để dùng ảnh trong thư viện thay vì phải chụp |
 | Đồng bộ | Chưa có | **Firestore tự động 2 chiều**, không có nút bấm tay |
-| Nhắc nhở | Một công tắc chung, giờ cố định | **Giờ riêng cho từng bữa**, tự bỏ qua bữa đã ghi, thông báo kèm số kcal còn thiếu |
+| Nhắc nhở | Một công tắc chung, giờ cố định | **Giờ riêng cho từng bữa**, mặc định **tắt**, tự bỏ qua bữa đã ghi, thông báo kèm số kcal còn thiếu |
 | Dữ liệu hiển thị | — | Không biết thì "–" / "Chưa có dữ liệu" / "No data", không suy diễn |
 | Ngôn ngữ | Việt | **Việt / English** cho toàn bộ chữ mới |
 
@@ -69,8 +69,25 @@ Kết quả nhận diện chỉ là **gợi ý**: người dùng luôn có thể
 ### 3.3. Gemini (tuỳ chọn)
 
 - Chỉ gọi khi người dùng bấm **"Nhờ AI mô tả"** — không tự gọi, không tốn quota.
-- Khoá đọc từ `local.properties` (`gemini.api.key`) hoặc biến môi trường, đưa vào `BuildConfig.GEMINI_API_KEY`; **không có khoá thì nút bị ẩn**, app vẫn chạy đầy đủ bằng dữ liệu có sẵn.
+- Khoá đọc từ `local.properties` (`gemini.api.key`) hoặc biến môi trường, đưa vào `BuildConfig.GEMINI_API_KEY`; **không có khoá thì nút bị ẩn**, app vẫn chạy đầy đủ bằng dữ liệu có sẵn. File `local.properties` đã nằm trong `.gitignore`, khoá không lên git.
 - Món do Gemini trả về được lưu với `is_custom = 1` và quy đổi dinh dưỡng theo /100 g để khẩu phần chỉnh được như món thường.
+- Prompt yêu cầu Gemini trả **JSON theo `responseSchema`** (tên món, khẩu phần, kcal, đạm/carb/béo, ghi chú) và từ chối khi ảnh không có món ăn — nhờ vậy app hiện đúng câu "AI không nhận ra món trong ảnh" thay vì bịa số.
+
+### 3.4. Chọn ảnh có sẵn
+
+- Hai nút **"Chọn ảnh có sẵn"**: một ở màn xin quyền camera, một ở màn chụp — người dùng không cần cấp quyền camera vẫn thử được AI.
+- Dùng **Photo Picker** (`ActivityResultContracts.PickVisualMedia`), **không xin quyền đọc thư viện**; hệ thống chỉ trả về đúng ảnh người dùng chọn.
+- Ảnh được thu nhỏ còn tối đa **1600 px**, nén JPEG 90 % và lưu vào `filesDir/photos`, sau đó đi **đúng pipeline của ảnh chụp**: TFLite trên máy trước, chỉ gọi Gemini khi bấm "Nhờ AI mô tả". Ảnh hỏng/không đọc được thì báo "Không đọc được ảnh đã chọn", không treo màn hình.
+
+### 3.5. Lỗi đã tìm ra và sửa: Gemini luôn trả 404
+
+Lần chạy thật đầu tiên, khoá đúng nhưng app nhận `Gemini trả về lỗi 404`. Nguyên nhân: `GeminiFoodService.post()` gọi `…/v1beta/models?key=…`, **thiếu `/{model}:generateContent`** trong URL. Đã sửa thành:
+
+```
+https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=…
+```
+
+Kiểm chứng lại bằng REST và bằng chính app: ảnh `pho_bo.webp` → TFLite đoán "Phở" 56 % → bấm "Nhờ AI mô tả" → Gemini trả **"Phở bò", 400 kcal cho 500 g, 35 g đạm / 50 g carb / 15 g béo**, badge "AI ước lượng" + ghi chú tiếng Việt; tăng khẩu phần lên 550 g thì app tự tính lại thành 450 kcal (35/60/20 g) và lưu vào bữa trưa. Ảnh `tuan4_pick_photo.png`, `tuan4_gemini_result.png`, `tuan4_ai_saved.png`.
 
 ---
 
@@ -118,14 +135,15 @@ users/{uid}/meal_items/{itemId}  ← món trong bữa (để phẳng, không l�
 Tab Cá nhân → **"Nhắc nhở giờ ăn"** mở hộp thoại:
 
 ```
-Bữa sáng    07:00   [bật]
+Bữa sáng    07:00   [tắt]
 Bữa trưa    11:30   [tắt]
 Bữa tối     18:30   [tắt]
                         [Xong]
 ```
 
 - Mỗi bữa một **công tắc** và một **nút giờ**; bấm giờ mở `TimePickerDialog` 24 giờ của hệ thống.
-- Mặc định 7:00 / 11:30 / 18:30 chỉ dùng cho lần cài đầu; sau đó đọc đúng giờ người dùng chọn.
+- **Mặc định tắt ở lần cài mới**: không tự xin quyền thông báo, không bắn thông báo ngoài ý muốn. Giờ 7:00 / 11:30 / 18:30 chỉ là gợi ý khi người dùng bật bữa đó.
+- Người dùng đã bật từ bản trước thì giữ nguyên lựa chọn cũ (đọc khoá `enabled` cũ), không bị tắt ngầm.
 - Dòng "Nhắc nhở giờ ăn" ngoài danh sách hiển thị gọn các mốc đang bật, ví dụ `07:00 · 11:30 · 18:30`, hoặc "Tắt".
 
 ### 5.2. Phần "thông minh"
@@ -136,6 +154,7 @@ Bữa tối     18:30   [tắt]
 - Trước khi bắn thông báo, worker kiểm tra **hôm nay bữa đó đã có món chưa**: có rồi thì im lặng, chỉ hẹn bữa sau.
 - Nội dung thông báo lấy **dữ liệu thật**: `"Còn 2236 kcal so với mục tiêu hôm nay."` (hoặc "đã đủ mục tiêu"), không có câu chung chung.
 - Từ Android 13, quyền thông báo được xin **đúng lúc bật công tắc**, không xin lung tung khi mở app.
+- Nếu quyền thông báo đang bị tắt ở cấp hệ điều hành, hộp thoại nhắc nhở hiện dòng cảnh báo đỏ *"Thông báo đang bị tắt cho NutriVision nên nhắc nhở sẽ không hiện."* kèm nút **"Mở cài đặt thông báo"** (`Settings.ACTION_APP_NOTIFICATION_SETTINGS`). Đây là lỗi thật gặp khi cài lại app: quyền chưa được cấp nên nhắc nhở im lặng dù công tắc đang bật.
 
 ### 5.3. Lỗi đã tìm ra và sửa
 
@@ -169,8 +188,8 @@ WM-DiagnosticsWrkr: 140befa4…  MealReminderWorker  ENQUEUED  meal_reminder
 | `data/ai/FoodClassifier.kt` | Chạy TFLite, tiền xử lý 224×224, top-3, ngưỡng 0.7 |
 | `data/remote/FirestoreSync.kt` | Đồng bộ 2 chiều, last-write-wins, tombstone, batch |
 | `data/remote/SyncMapper.kt` | Map Entity ⇄ Firestore document |
-| `data/remote/GeminiFoodService.kt` | Gọi Gemini mô tả món + quy đổi /100 g |
-| `data/prefs/ReminderSettings.kt` | Giờ + bật/tắt từng bữa, migrate khoá `enabled` cũ |
+| `data/remote/GeminiFoodService.kt` | Gọi Gemini mô tả món + quy đổi /100 g (endpoint `/{model}:generateContent`) |
+| `data/prefs/ReminderSettings.kt` | Giờ + bật/tắt từng bữa (mặc định **tắt**), migrate khoá `enabled` cũ |
 | `data/local/relation/DataFingerprint.kt` | "Vân tay" bảng để phát hiện thay đổi |
 | `notifications/MealSlot.kt` | 3 bữa, `ReminderPlanner.next()`, nội dung thông báo động |
 | `notifications/ReminderScheduler.kt` | Hẹn mốc kế tiếp, tạo kênh, bắn thông báo |
@@ -187,9 +206,9 @@ WM-DiagnosticsWrkr: 140befa4…  MealReminderWorker  ENQUEUED  meal_reminder
 |---|---|
 | `MainActivity.kt` | Nối state mới, `onAppForeground()` khi quay lại app |
 | `ui/viewmodel/AppViewModel.kt` | `startAutoSync()` (debounce 2 s), `onAppForeground()`, `lastSyncError`, bỏ `syncNow`, `setReminderEnabled/Time` |
-| `ui/screens/ProfileScreen.kt` | Bỏ nút đồng bộ tay, thêm `ReminderDialog` + TimePicker, bỏ placeholder |
+| `ui/screens/ProfileScreen.kt` | Bỏ nút đồng bộ tay, thêm `ReminderDialog` + TimePicker, cảnh báo khi quyền thông báo bị tắt, bỏ placeholder |
 | `ui/screens/MainShell.kt` | Truyền state nhắc nhở + lỗi đồng bộ xuống Cá nhân |
-| `ui/screens/CameraScreen.kt` | Sửa icon thanh trạng thái, chip nhãn ngắn |
+| `ui/screens/CameraScreen.kt` | Sửa icon thanh trạng thái, chip nhãn ngắn, thêm **"Chọn ảnh có sẵn"** (Photo Picker) + `importPickedPhoto()` nén ảnh ≤ 1600 px |
 | `data/local/dao/MealDao.kt` | `countMealTypeItems`, `totalCalories`, 2 hàm `observe*Fingerprint` |
 | `data/local/dao/UserDao.kt` | `observeFingerprint` |
 | `data/prefs/SessionManager.kt` | `lastSyncError`, `markSyncFailed`, xoá lỗi khi thành công |
@@ -234,10 +253,12 @@ BUILD SUCCESSFUL
 |---|---|
 | Đăng ký + nhận link xác thực | Có thẻ "Email chưa xác thực", gửi lại được |
 | Chụp món + nhận diện | Top-3 hiện đúng khung, món lưu vào bữa đã chọn |
+| **Chọn ảnh có sẵn** (`pho_bo.webp`) | TFLite đoán "Phở" 56 %; Gemini trả "Phở bò" + dinh dưỡng; lưu vào bữa trưa, tổng calo cộng đúng |
 | Thêm món → tự đồng bộ | `last_sync_at` đổi sau ~2 s, không bấm gì |
 | Gỡ + cài lại + đăng nhập | Hồ sơ và món cũ quay về từ Firestore |
 | Đổi giờ nhắc 10:55, chờ | Thông báo bắn đúng phút, kèm kcal còn thiếu |
 | Bật/tắt từng bữa | Job `meal_reminder` được thay đúng mốc kế tiếp |
+| Cài mới (chưa cấp quyền thông báo) | Nhắc nhở mặc định tắt; hộp thoại hiện cảnh báo + nút mở cài đặt |
 
 ---
 
@@ -252,12 +273,15 @@ BUILD SUCCESSFUL
 | `docs/screenshots/tuan4_reminder_dialog.png` | Hộp thoại chỉnh giờ từng bữa |
 | `docs/screenshots/tuan4_notification.png` | Thông báo thật lúc 10:55 kèm kcal còn thiếu |
 | `docs/screenshots/tuan4_sync_restored.png` | Cài lại app, đăng nhập, dữ liệu về đủ |
+| `docs/screenshots/tuan4_pick_photo.png` | "Chọn ảnh có sẵn" → TFLite nhận "Phở" 56 % |
+| `docs/screenshots/tuan4_gemini_result.png` | Gemini trả "Phở bò" + dinh dưỡng, badge "AI ước lượng" |
+| `docs/screenshots/tuan4_ai_saved.png` | Món AI đã nằm trong nhật ký bữa trưa |
 
 ---
 
 ## 10. Hạn chế và việc còn lại
 
-1. **Chưa có khoá Gemini trong `local.properties`** nên nút "Nhờ AI mô tả" đang ẩn; cần thêm `gemini.api.key` rồi build lại để chụp minh chứng end-to-end.
+1. **Khoá Gemini không nằm trong repo** (đúng quy ước bảo mật): máy khác muốn thử AI phải tự thêm `gemini.api.key` vào `local.properties` rồi build lại; chưa có khoá thì nút "Nhờ AI mô tả" tự ẩn và app vẫn chạy đủ bằng model trên máy. Chất lượng mô tả phụ thuộc hạn mức/khoá của người dùng.
 2. Model TFLite đạt khoảng **71% top-1** trên tập test gốc; ảnh chụp thực tế trong nhà có thể thấp hơn — vì vậy app luôn cho chọn lại món và hiện "Chưa chắc chắn" khi độ tin cậy < 0.7.
 3. Model **không có lớp đồ uống**; ảnh đồ uống thường bị đoán sang món ăn gần nhất.
 4. Ảnh đã chụp (`photoUri`) đã lưu trong DB nhưng **chưa hiển thị** trong nhật ký.

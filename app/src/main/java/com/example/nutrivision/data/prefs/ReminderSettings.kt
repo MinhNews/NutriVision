@@ -39,7 +39,8 @@ data class ReminderState(val slots: List<ReminderSlotSetting>) {
 
 fun MealSlot.defaultSetting() = ReminderSlotSetting(
     slot = this,
-    enabled = true,
+    // Mặc định TẮT: muốn nhắc thì người dùng tự bật, và lúc bật app mới xin quyền thông báo.
+    enabled = false,
     hour = defaultHour,
     minute = defaultMinute,
 )
@@ -84,7 +85,8 @@ class ReminderSettings(context: Context) {
         MealSlot.entries.map { slot ->
             ReminderSlotSetting(
                 slot = slot,
-                enabled = prefs.getBoolean(keyEnabled(slot), legacyMasterEnabled ?: true),
+                // Người dùng cũ đã bật công tắc chung thì giữ nguyên; cài mới thì mặc định tắt.
+                enabled = prefs.getBoolean(keyEnabled(slot), legacyMasterEnabled ?: false),
                 hour = prefs.getInt(keyHour(slot), slot.defaultHour),
                 minute = prefs.getInt(keyMinute(slot), slot.defaultMinute),
             )

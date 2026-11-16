@@ -1,8 +1,13 @@
 package com.example.nutrivision.ui.screens
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -37,6 +42,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.CameraAlt
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.FilterChip
@@ -50,6 +56,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -86,7 +93,11 @@ import com.example.nutrivision.ui.viewmodel.RecognizeStage
 import com.example.nutrivision.ui.util.oneDecimal
 import com.example.nutrivision.ui.util.SystemBarsAppearance
 import java.io.File
+import java.io.FileOutputStream
 import java.util.UUID
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
 /**
@@ -113,6 +124,27 @@ fun CameraScreen(
         contract = ActivityResultContracts.RequestPermission(),
     ) { granted -> hasPermission = granted }
 
+    // Chọn ảnh có sẵn: cùng pipeline với ảnh chụp (model trên máy → Gemini nếu cần).
+    // Photo Picker không cần quyền đọc thư viện, chỉ trả về đúng ảnh người dùng chọn.
+    val scope = rememberCoroutineScope()
+    val photoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val path = importPickedPhoto(context, uri)
+            if (path != null) {
+                viewModel.onPhotoCaptured(path)
+            } else {
+                viewModel.onPhotoImportFailed()
+            }
+        }
+    }
+    val pickPhoto = {
+        photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        Unit
+    }
+
     LaunchedEffect(Unit) {
         if (!hasPermission) launcher.launch(Manifest.permission.CAMERA)
     }
@@ -137,11 +169,13 @@ fun CameraScreen(
             !hasPermission -> PermissionRequest(
                 onRequest = { launcher.launch(Manifest.permission.CAMERA) },
                 onOpenSearch = onOpenSearch,
+                onPickPhoto = pickPhoto,
             )
 
             showCamera -> CameraCapture(
                 viewModel = viewModel,
                 onOpenSearch = onOpenSearch,
+                onPickPhoto = pickPhoto,
             )
 
             uiState.stage == RecognizeStage.ANALYZING -> AnalyzingState(uiState.photoPath)
@@ -164,7 +198,11 @@ fun CameraScreen(
 }
 
 @Composable
-private fun PermissionRequest(onRequest: () -> Unit, onOpenSearch: () -> Unit) {
+private fun PermissionRequest(
+    onRequest: () -> Unit,
+    onOpenSearch: () -> Unit,
+    onPickPhoto: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -215,6 +253,16 @@ private fun PermissionRequest(onRequest: () -> Unit, onOpenSearch: () -> Unit) {
         TextButton(onClick = onOpenSearch) {
             Text(tr("Tìm món bằng danh mục", "Search the catalogue instead"), color = PrimaryGreen)
         }
+        TextButton(onClick = onPickPhoto) {
+            Icon(
+                Icons.Rounded.PhotoLibrary,
+                contentDescription = null,
+                tint = PrimaryGreen,
+                modifier = Modifier.size(18.dp),
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(tr("Chọn ảnh có sẵn", "Choose a photo"), color = PrimaryGreen)
+        }
     }
 }
 
@@ -222,6 +270,7 @@ private fun PermissionRequest(onRequest: () -> Unit, onOpenSearch: () -> Unit) {
 private fun CameraCapture(
     viewModel: CameraViewModel,
     onOpenSearch: () -> Unit,
+    onPickPhoto: () -> Unit,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -385,9 +434,46 @@ private fun CameraCapture(
                 color = Color.White.copy(alpha = 0.8f),
             )
         }
-        Spacer(Modifier.height(10.dp))
+        TextButton(onClick = onPickPhoto, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+            Icon(Icons.Rounded.PhotoLibrary, contentDescription = null, tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(6.dp))
+            Text(
+                tr("Chọn ảnh có sẵn", "Choose a photo"),
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White.copy(alpha = 0.8f),
+            )
+        }
+        Spacer(Modifier.height(4.dp))
     }
 }
+
+/**
+ * Đọc ảnh người dùng chọn từ thư viện, thu nhỏ còn tối đa 1600 px và lưu thành JPEG
+ * trong bộ nhớ riêng của app — để model trên máy và Gemini dùng chung một đường xử lý.
+ * Trả về null khi ảnh hỏng hoặc không đọc được.
+ */
+private suspend fun importPickedPhoto(context: Context, uri: Uri): String? =
+    withContext(Dispatchers.IO) {
+        runCatching {
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            context.contentResolver.openInputStream(uri)?.use {
+                BitmapFactory.decodeStream(it, null, bounds)
+            }
+            var sample = 1
+            while (maxOf(bounds.outWidth, bounds.outHeight) / sample > 1600) sample *= 2
+            val bitmap = context.contentResolver.openInputStream(uri)?.use {
+                BitmapFactory.decodeStream(it, null, BitmapFactory.Options().apply { inSampleSize = sample })
+            } ?: return@runCatching null
+
+            val dir = File(context.filesDir, "photos").apply { mkdirs() }
+            val file = File(dir, "${UUID.randomUUID()}.jpg")
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+            }
+            bitmap.recycle()
+            file.absolutePath
+        }.getOrNull()
+    }
 
 @Composable
 private fun ScannerFrame() {

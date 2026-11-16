@@ -217,6 +217,11 @@ class CameraViewModel(
         _uiState.value = _uiState.value.copy(stage = RecognizeStage.FAILED, message = message)
     }
 
+    /** Ảnh chọn từ thư viện không đọc được (file hỏng, quyền truy cập bị thu hồi...). */
+    fun onPhotoImportFailed() {
+        fail(tr("Không đọc được ảnh đã chọn. Thử ảnh khác giúp nhé.", "Could not read the selected photo. Try another one."))
+    }
+
     private fun FoodPrediction.toCandidate(): PhotoCandidate {
         val name = runCatching { classifier.displayName(label) }.getOrDefault(label)
         return PhotoCandidate(foodId = label, name = name, confidence = confidence)
