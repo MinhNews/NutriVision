@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,7 +29,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -48,12 +48,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.nutrivision.R
 import com.example.nutrivision.domain.text.tr
 import com.example.nutrivision.domain.validation.AuthIssue
 import com.example.nutrivision.domain.validation.AuthValidation
@@ -62,7 +64,6 @@ import com.example.nutrivision.ui.components.AppTextField
 import com.example.nutrivision.ui.components.GradientButton
 import com.example.nutrivision.ui.theme.ForestDeep
 import com.example.nutrivision.ui.theme.ForestInk
-import com.example.nutrivision.ui.theme.MintMid
 import com.example.nutrivision.ui.theme.PrimaryGreen
 import com.example.nutrivision.ui.theme.SurfaceLight
 import com.example.nutrivision.ui.theme.TextMuted
@@ -133,20 +134,13 @@ fun AuthScreen(
             Spacer(Modifier.height(18.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
+                Image(
+                    painter = painterResource(id = R.drawable.app_logo),
+                    contentDescription = "NutriVision",
                     modifier = Modifier
                         .size(52.dp)
-                        .clip(RoundedCornerShape(17.dp))
-                        .background(Brush.linearGradient(listOf(PrimaryGreen, ForestDeep))),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        Icons.Rounded.Spa,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(26.dp),
-                    )
-                }
+                        .clip(RoundedCornerShape(17.dp)),
+                )
                 Spacer(Modifier.width(12.dp))
                 Column {
                     Text(
@@ -379,33 +373,6 @@ fun AuthScreen(
                 }
             }
 
-            Spacer(Modifier.height(20.dp))
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(MintMid.copy(alpha = 0.55f))
-                    .padding(14.dp),
-                verticalAlignment = Alignment.Top,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .padding(top = 4.dp)
-                        .clip(CircleShape)
-                        .background(PrimaryGreen),
-                )
-                Spacer(Modifier.width(10.dp))
-                Text(
-                    tr(
-                        "Hồ sơ và nhật ký của bạn được lưu trong tài khoản riêng, chỉ bạn đọc được.",
-                        "Your profile and diary live in your own account - only you can read them.",
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = ForestInk.copy(alpha = 0.8f),
-                )
-            }
 
             Spacer(Modifier.height(24.dp))
         }
