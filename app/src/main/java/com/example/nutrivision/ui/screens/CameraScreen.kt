@@ -23,6 +23,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -67,6 +68,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -680,12 +682,22 @@ private fun RecognitionResult(
                     color = TextMuted,
                 )
 
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
                     MealType.entries.forEach { type ->
                         FilterChip(
                             selected = uiState.mealType == type,
                             onClick = { onMealType(type) },
-                            label = { Text(type.shortLabel, style = MaterialTheme.typography.labelMedium) },
+                            label = {
+                                Text(
+                                    type.shortLabel,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    maxLines = 1,
+                                )
+                            },
                         )
                     }
                 }
@@ -698,8 +710,12 @@ private fun RecognitionResult(
                     style = MaterialTheme.typography.labelMedium,
                     color = TextSecondary,
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    alternatives.take(2).forEach { candidate ->
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    alternatives.take(3).forEach { candidate ->
                         FilterChip(
                             selected = false,
                             onClick = { onSelect(candidate) },
@@ -707,6 +723,8 @@ private fun RecognitionResult(
                                 Text(
                                     "${candidate.name} · ${candidate.percent}%",
                                     style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
                                 )
                             },
                         )
