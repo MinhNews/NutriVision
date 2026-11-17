@@ -11,6 +11,7 @@ local.properties
 # Android build output
 app/build/
 *.hprof
+.kotlin/
 
 # Dữ liệu tải thô của công cụ ảnh (không đóng gói vào repo)
 ai_tools/dataset/

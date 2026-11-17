@@ -6,13 +6,9 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -20,29 +16,27 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Spa
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -67,6 +61,7 @@ import com.example.nutrivision.ui.text.LanguageController
 import com.example.nutrivision.ui.text.LocalLanguageController
 import com.example.nutrivision.ui.util.SystemBarsAppearance
 import com.example.nutrivision.ui.viewmodel.AppViewModel
+import com.example.nutrivision.ui.viewmodel.AuthState
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,7 +82,7 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.LIGHT -> false
                 ThemeMode.DARK -> true
             }
-            // Đặt ngôn ngữ trước khi vẽ cây UI để mọi chuỗi đọc đúng ngay từ khung hình đầu.
+            // Dat ngon ngu truoc khi ve cay UI de moi chuoi duoc dung ngay tu khung hinh dau.
             AppLocale.language = language
             CompositionLocalProvider(
                 LocalThemeController provides ThemeController(
@@ -108,14 +103,14 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * Điều hướng gốc của app — không dùng navigation-compose.
+ * Dieu huong goc cua app - khong dung navigation-compose.
  *
- * Thứ tự trạng thái:
- * 1. Chưa xem onboarding  → OnboardingScreen
- * 2. Đang đọc DB lần đầu   → Splash
- * 3. Chưa có hồ sơ         → AuthScreen (đăng ký) → ProfileSetupScreen
- * 4. Có hồ sơ, chưa login  → AuthScreen (đăng nhập)
- * 5. Đã login              → MainShell (5 tab)
+ * Thu tu trang thai:
+ * 1. Chua xem onboarding   -> OnboardingScreen
+ * 2. Firebase dang khoi phuc phien -> Splash
+ * 3. Chua dang nhap        -> AuthScreen (dang nhap / dang ky that)
+ * 4. Da dang nhap, chua co ho so -> ProfileSetupScreen
+ * 5. Da co ho so           -> MainShell (5 tab)
  */
 @Composable
 private fun NutriVisionRoot(container: AppContainer) {
@@ -126,6 +121,12 @@ private fun NutriVisionRoot(container: AppContainer) {
                 AppViewModel(
                     userRepository = container.userRepository,
                     sessionManager = container.sessionManager,
+                    authRepository = container.authRepository,
+                    localDataStore = container.localDataStore,
+                    database = container.database,
+                    firestoreSync = container.firestoreSync,
+                    reminderSettings = container.reminderSettings,
+                    reminderScheduler = container.reminderScheduler,
                     foodRepository = container.foodRepository,
                 )
             }
@@ -133,14 +134,26 @@ private fun NutriVisionRoot(container: AppContainer) {
     )
 
     val onboardingCompleted by appViewModel.onboardingCompleted.collectAsStateWithLifecycle()
-    val loggedIn by appViewModel.loggedIn.collectAsStateWithLifecycle()
+    val authState by appViewModel.authState.collectAsStateWithLifecycle()
     val profile by appViewModel.profile.collectAsStateWithLifecycle()
     val profileLoaded by appViewModel.profileLoaded.collectAsStateWithLifecycle()
+    val busy by appViewModel.busy.collectAsStateWithLifecycle()
+    val message by appViewModel.message.collectAsStateWithLifecycle()
+    val emailVerified by appViewModel.emailVerified.collectAsStateWithLifecycle()
+    val syncing by appViewModel.syncing.collectAsStateWithLifecycle()
+    val lastSyncAt by appViewModel.lastSyncAt.collectAsStateWithLifecycle()
+    val syncError by appViewModel.lastSyncError.collectAsStateWithLifecycle()
+    val reminders by appViewModel.reminders.collectAsStateWithLifecycle()
 
-    // Nháp đăng ký: email/tên người dùng vừa nhập ở AuthScreen, chuyển sang bước thiết lập hồ sơ.
-    var draftEmail by rememberSaveable { mutableStateOf("") }
-    var draftName by rememberSaveable { mutableStateOf("") }
-    var creatingProfile by rememberSaveable { mutableStateOf(false) }
+    // Quay lại app sau một lúc: dữ liệu máy khác có thể đã đổi, đồng bộ lại trong im lặng.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START) appViewModel.onAppForeground()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     if (!onboardingCompleted) {
         SystemBarsAppearance(useDarkIcons = false)
@@ -150,87 +163,96 @@ private fun NutriVisionRoot(container: AppContainer) {
         return
     }
 
-    if (!profileLoaded) {
-        SystemBarsAppearance(useDarkIcons = false)
-        SplashScreen()
-        return
-    }
+    when (val state = authState) {
+        AuthState.Loading -> {
+            SystemBarsAppearance(useDarkIcons = false)
+            SplashScreen()
+        }
 
-    val currentProfile = profile
-
-    if (currentProfile == null) {
-        if (creatingProfile) {
-            SystemBarsAppearance(useDarkIcons = !darkTheme)
-            BackHandler { creatingProfile = false }
-            ProfileSetupScreen(
-                initial = null,
-                draftEmail = draftEmail,
-                draftName = draftName,
-                canGoBack = true,
-                onBack = { creatingProfile = false },
-                onSave = { email, name, gender, age, height, weight, activity, goal ->
-                    appViewModel.saveProfile(
-                        email = email,
-                        displayName = name,
-                        gender = gender,
-                        age = age,
-                        heightCm = height,
-                        weightKg = weight,
-                        activityLevel = activity,
-                        goal = goal,
-                        onSaved = { creatingProfile = false },
-                    )
-                },
-            )
-        } else {
+        AuthState.SignedOut -> {
             SystemBarsAppearance(useDarkIcons = !darkTheme)
             AuthScreen(
-                profileExists = false,
-                onLogin = { appViewModel.login() },
-                onRegister = { email, name ->
-                    draftEmail = email
-                    draftName = name
-                    creatingProfile = true
-                },
+                busy = busy,
+                message = message,
+                onClearMessage = appViewModel::clearMessage,
+                onLogin = appViewModel::login,
+                onRegister = appViewModel::register,
+                onForgotPassword = appViewModel::resetPassword,
             )
         }
-        return
-    }
 
-    if (!loggedIn) {
-        SystemBarsAppearance(useDarkIcons = !darkTheme)
-        AuthScreen(
-            profileExists = true,
-            onLogin = { appViewModel.login() },
-            onRegister = { _, _ -> },
-        )
-        return
-    }
+        is AuthState.SignedIn -> {
+            val currentProfile = profile
+            when {
+                !profileLoaded -> {
+                    SystemBarsAppearance(useDarkIcons = false)
+                    SplashScreen()
+                }
 
-    MainShell(
-        container = container,
-        profile = currentProfile,
-        onLogout = {
-            appViewModel.logout()
-            creatingProfile = false
-        },
-        onSaveProfile = { email, name, gender, age, height, weight, activity, goal, onSaved ->
-            appViewModel.saveProfile(
-                email = email,
-                displayName = name,
-                gender = gender,
-                age = age,
-                heightCm = height,
-                weightKg = weight,
-                activityLevel = activity,
-                goal = goal,
-                onSaved = onSaved,
-            )
-        },
-    )
+                currentProfile == null -> {
+                    SystemBarsAppearance(useDarkIcons = !darkTheme)
+                    // Back o buoc nay = dang xuat, de nguoi dung doi tai khoan khac.
+                    BackHandler { appViewModel.logout() }
+                    ProfileSetupScreen(
+                        initial = null,
+                        draftEmail = state.email,
+                        draftName = state.displayName.orEmpty(),
+                        canGoBack = true,
+                        onBack = { appViewModel.logout() },
+                        onSave = { email, name, gender, age, height, weight, activity, goal ->
+                            appViewModel.saveProfile(
+                                email = email,
+                                displayName = name,
+                                gender = gender,
+                                age = age,
+                                heightCm = height,
+                                weightKg = weight,
+                                activityLevel = activity,
+                                goal = goal,
+                                onSaved = {},
+                            )
+                        },
+                    )
+                }
+
+                else -> {
+                    MainShell(
+                        container = container,
+                        profile = currentProfile,
+                        accountEmail = state.email,
+                        emailVerified = emailVerified,
+                        syncing = syncing,
+                        lastSyncAt = lastSyncAt,
+                        syncError = syncError,
+                        reminders = reminders,
+                        onSetReminderEnabled = appViewModel::setReminderEnabled,
+                        onSetReminderTime = appViewModel::setReminderTime,
+                        message = message,
+                        onClearMessage = appViewModel::clearMessage,
+                        onResendVerification = appViewModel::resendVerification,
+                        onRefreshVerification = appViewModel::refreshVerification,
+                        onLogout = appViewModel::logout,
+                        onSaveProfile = { email, name, gender, age, height, weight, activity, goal, onSaved ->
+                            appViewModel.saveProfile(
+                                email = email,
+                                displayName = name,
+                                gender = gender,
+                                age = age,
+                                heightCm = height,
+                                weightKg = weight,
+                                activityLevel = activity,
+                                goal = goal,
+                                onSaved = onSaved,
+                            )
+                        },
+                    )
+                }
+            }
+        }
+    }
 }
 
-/** Màn chờ rất ngắn trong lúc Room mở lần đầu và nạp 145 món. */
+/** Man cho rat ngan trong luc Firebase khoi phuc phien va Room mo lan dau. */
 @Composable
 private fun SplashScreen() {
     Box(
@@ -253,20 +275,13 @@ private fun SplashScreen() {
             )
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(
+            Image(
+                painter = painterResource(id = R.drawable.app_logo),
+                contentDescription = "NutriVision Logo",
                 modifier = Modifier
-                    .size(78.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.14f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    Icons.Rounded.Spa,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(36.dp),
-                )
-            }
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(24.dp)),
+            )
             Spacer(Modifier.height(16.dp))
             Text(
                 "NutriVision",
@@ -276,7 +291,7 @@ private fun SplashScreen() {
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                tr("Đang mở dữ liệu dinh dưỡng…", "Opening nutrition data…"),
+                tr("Đang mở dữ liệu dinh dưỡng...", "Opening nutrition data..."),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White.copy(alpha = 0.7f),
             )

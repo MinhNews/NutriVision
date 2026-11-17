@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.nutrivision.data.local.entity.UserEntity
+import com.example.nutrivision.data.local.relation.DataFingerprint
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -18,6 +19,14 @@ interface UserDao {
 
     @Query("SELECT COUNT(*) FROM users")
     suspend fun count(): Int
+
+    @Query(
+        """
+        SELECT COUNT(*) AS row_count, COALESCE(MAX(updated_at), 0) AS last_update
+        FROM users WHERE user_id = :userId
+        """
+    )
+    fun observeFingerprint(userId: String): Flow<DataFingerprint>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(user: UserEntity)

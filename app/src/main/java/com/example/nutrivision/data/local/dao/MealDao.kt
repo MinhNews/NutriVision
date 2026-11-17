@@ -8,6 +8,7 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.example.nutrivision.data.local.entity.MealEntity
 import com.example.nutrivision.data.local.entity.MealItemEntity
+import com.example.nutrivision.data.local.relation.DataFingerprint
 import com.example.nutrivision.data.local.relation.DailyTotalRow
 import com.example.nutrivision.data.local.relation.MealWithItemsEntity
 import com.example.nutrivision.data.local.relation.NutritionSumRow
@@ -137,4 +138,76 @@ interface MealDao {
 
     @Query("UPDATE meal_items SET meal_id = :mealId, updated_at = :now WHERE id = :itemId")
     suspend fun moveItem(itemId: String, mealId: String, now: Long)
+
+    // ------------------------------------------------------------------ đồng bộ Firestore
+
+    @Query("SELECT * FROM meals WHERE user_id = :userId")
+    suspend fun allMeals(userId: String): List<MealEntity>
+
+    @Query(
+        """
+        SELECT * FROM meal_items
+        WHERE meal_id IN (SELECT id FROM meals WHERE user_id = :userId)
+        """
+    )
+    suspend fun allItemsOfUser(userId: String): List<MealItemEntity>
+
+    /**
+     * Upsert cho đồng bộ: không dùng REPLACE vì REPLACE = DELETE + INSERT,
+     * mà meals là bảng cha của meal_items (CASCADE) nên sẽ xoá mất món trong bữa.
+     */
+    @Transaction
+    suspend fun upsertMeal(meal: MealEntity) {
+        if (getMeal(meal.id) == null) insertMeal(meal) else updateMeal(meal)
+    }
+
+    @Transaction
+    suspend fun upsertItem(item: MealItemEntity) {
+        if (getItem(item.id) == null) insertItem(item) else updateItem(item)
+    }
+
+    @Query("UPDATE meals SET sync_status = :status WHERE id IN (:ids)")
+    suspend fun setMealSyncStatus(ids: List<String>, status: String)
+
+    // ------------------------------------------------------- nhắc nhở & đồng bộ tự động
+
+    /** Số món đã ghi cho một bữa trong ngày - worker dùng để không nhắc lại bữa đã ghi. */
+    @Query(
+        """
+        SELECT COUNT(*) FROM meal_items i
+        JOIN meals m ON i.meal_id = m.id
+        WHERE m.user_id = :userId AND m.date = :date AND m.meal_type = :mealType
+          AND m.deleted_at IS NULL AND i.deleted_at IS NULL
+        """
+    )
+    suspend fun countMealTypeItems(userId: String, date: String, mealType: String): Int
+
+    /** Tổng calo đã ăn trong ngày - dùng cho nội dung thông báo. */
+    @Query(
+        """
+        SELECT COALESCE(SUM(i.calories), 0) FROM meal_items i
+        JOIN meals m ON i.meal_id = m.id
+        WHERE m.user_id = :userId AND m.date = :date
+          AND m.deleted_at IS NULL AND i.deleted_at IS NULL
+        """
+    )
+    suspend fun totalCalories(userId: String, date: String): Double
+
+    @Query(
+        """
+        SELECT COUNT(*) AS row_count, COALESCE(MAX(updated_at), 0) AS last_update
+        FROM meals WHERE user_id = :userId
+        """
+    )
+    fun observeMealFingerprint(userId: String): Flow<DataFingerprint>
+
+    @Query(
+        """
+        SELECT COUNT(*) AS row_count, COALESCE(MAX(i.updated_at), 0) AS last_update
+        FROM meal_items i
+        JOIN meals m ON i.meal_id = m.id
+        WHERE m.user_id = :userId
+        """
+    )
+    fun observeItemFingerprint(userId: String): Flow<DataFingerprint>
 }

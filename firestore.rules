@@ -1,0 +1,15 @@
+rules_version = '2';
+
+// NutriVision: mỗi tài khoản chỉ đọc/ghi được dữ liệu của chính mình.
+// Cấu trúc: users/{uid} (hồ sơ), users/{uid}/meals/{mealId}, users/{uid}/meal_items/{itemId}.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /{collection}/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}

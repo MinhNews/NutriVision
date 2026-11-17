@@ -37,9 +37,9 @@ data class DiaryUiState(
 class DiaryViewModel(
     private val userRepository: UserRepository,
     private val mealRepository: MealRepository,
+    private val userId: String,
 ) : ViewModel() {
 
-    private val userId = UserRepository.LOCAL_USER_ID
     private val _selectedDate = MutableStateFlow(DateUtils.todayKey())
     val selectedDate: StateFlow<String> = _selectedDate.asStateFlow()
     private val _today = MutableStateFlow(DateUtils.todayKey())

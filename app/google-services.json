@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1021506337307",
+    "project_id": "nutrivision-9c3a3",
+    "storage_bucket": "nutrivision-9c3a3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1021506337307:android:377bcfbe86472d2f5996be",
+        "android_client_info": {
+          "package_name": "com.example.nutrivision"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhnMxkaPWNFrMSv9teausVDjXjrYm5TOI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
