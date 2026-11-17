@@ -69,6 +69,7 @@ Kết quả nhận diện chỉ là **gợi ý**: người dùng luôn có thể
 ### 3.3. Gemini (tuỳ chọn)
 
 - Chỉ gọi khi người dùng bấm **"Nhờ AI mô tả"** — không tự gọi, không tốn quota.
+- **Không chỉ hiện khi model chưa chắc chắn**: model có thể đoán sai món mà vẫn cho điểm cao (ảnh mờ, món lạ, góc chụp lạ), nên khi model tự tin vẫn có dòng *"Nhận diện sai? Nhờ AI xem lại"* ngay dưới nút lưu — AI luôn là lối thoát, nhưng chỉ chạy khi người dùng chủ động bấm.
 - Khoá đọc từ `local.properties` (`gemini.api.key`) hoặc biến môi trường, đưa vào `BuildConfig.GEMINI_API_KEY`; **không có khoá thì nút bị ẩn**, app vẫn chạy đầy đủ bằng dữ liệu có sẵn. File `local.properties` đã nằm trong `.gitignore`, khoá không lên git.
 - Món do Gemini trả về được lưu với `is_custom = 1` và quy đổi dinh dưỡng theo /100 g để khẩu phần chỉnh được như món thường.
 - Prompt yêu cầu Gemini trả **JSON theo `responseSchema`** (tên món, khẩu phần, kcal, đạm/carb/béo, ghi chú) và từ chối khi ảnh không có món ăn — nhờ vậy app hiện đúng câu "AI không nhận ra món trong ảnh" thay vì bịa số.
@@ -254,6 +255,7 @@ BUILD SUCCESSFUL
 | Đăng ký + nhận link xác thực | Có thẻ "Email chưa xác thực", gửi lại được |
 | Chụp món + nhận diện | Top-3 hiện đúng khung, món lưu vào bữa đã chọn |
 | **Chọn ảnh có sẵn** (`pho_bo.webp`) | TFLite đoán "Phở" 56 %; Gemini trả "Phở bò" + dinh dưỡng; lưu vào bữa trưa, tổng calo cộng đúng |
+| Model tự tin nhưng nghi sai | 96 % vẫn có dòng "Nhận diện sai? Nhờ AI xem lại" → Gemini trả "Hot dog" 300 kcal, badge "AI ước lượng" |
 | Thêm món → tự đồng bộ | `last_sync_at` đổi sau ~2 s, không bấm gì |
 | Gỡ + cài lại + đăng nhập | Hồ sơ và món cũ quay về từ Firestore |
 | Đổi giờ nhắc 10:55, chờ | Thông báo bắn đúng phút, kèm kcal còn thiếu |

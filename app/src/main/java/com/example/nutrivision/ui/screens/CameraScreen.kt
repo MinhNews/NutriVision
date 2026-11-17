@@ -768,7 +768,10 @@ private fun RecognitionResult(
                     modifier = Modifier.fillMaxWidth(),
                 )
             } else {
-                if (!uiState.confident && aiConfigured && (food == null || uiState.source != MealItemEntity.SOURCE_GEMINI)) {
+                // AI luôn là lối thoát, kể cả khi model tự tin: model có thể đoán sai món mà vẫn
+                // cho điểm cao (ảnh mờ, món lạ, góc chụp lạ). Chỉ tính quota khi người dùng bấm.
+                val aiAvailable = aiConfigured && uiState.source != MealItemEntity.SOURCE_GEMINI
+                if (aiAvailable && !uiState.confident) {
                     GradientButton(
                         text = tr("Nhờ AI mô tả", "Ask AI to describe"),
                         icon = Icons.Rounded.AutoAwesome,
@@ -784,6 +787,31 @@ private fun RecognitionResult(
                     enabled = uiState.canSave && !uiState.aiBusy,
                     modifier = Modifier.fillMaxWidth(),
                 )
+                if (aiAvailable && uiState.confident) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        TextButton(onClick = onAskAi, enabled = !uiState.aiBusy) {
+                            Icon(
+                                Icons.Rounded.AutoAwesome,
+                                contentDescription = null,
+                                tint = if (uiState.aiBusy) TextMuted else PrimaryGreen,
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                if (uiState.aiBusy) {
+                                    tr("Đang hỏi AI…", "Asking AI…")
+                                } else {
+                                    tr("Nhận diện sai? Nhờ AI xem lại", "Wrong dish? Ask AI to check")
+                                },
+                                color = if (uiState.aiBusy) TextMuted else PrimaryGreen,
+                                style = MaterialTheme.typography.labelLarge,
+                            )
+                        }
+                    }
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
