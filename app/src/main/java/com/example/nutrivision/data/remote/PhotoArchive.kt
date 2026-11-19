@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
+import kotlin.math.roundToInt
 
 /**
  * Đồng bộ ảnh món mà **không cần Firebase Storage** (Storage đòi gói Blaze).
@@ -84,18 +85,38 @@ class PhotoArchive(
     private fun collection(userId: String) = firestore.collection(USERS).document(userId)
         .collection(PHOTOS)
 
-    /** Nén ảnh: giữ đúng chiều, thu nhỏ bằng inSampleSize để không nạp bitmap quá lớn. */
+    /**
+     * Nén ảnh: giữ đúng chiều, thu nhỏ về đúng [MAX_SIDE] ở cạnh dài rồi JPEG hoá.
+     *
+     * `inSampleSize` chỉ giảm theo luỹ thừa 2 (1, 2, 4, 8…) nên một mình nó thường cho
+     * ảnh nhỏ hơn mức cần (ảnh 1632 px chia 4 còn 408 px). Vì vậy chỉ dùng nó để hạ
+     * bitmap xuống gần đích, sau đó scale chính xác bằng `createScaledBitmap`.
+     * Ảnh gốc nhỏ hơn [MAX_SIDE] thì giữ nguyên, không phóng to.
+     */
     private fun encode(source: File): String? = runCatching {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(source.absolutePath, bounds)
         if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
 
+        // Chỉ chia đôi khi vẫn còn lớn hơn gấp đôi đích, để bước scale sau là thu nhỏ
+        // (giảm mịn) chứ không phải phóng to làm mờ ảnh.
         var sample = 1
-        while (maxOf(bounds.outWidth, bounds.outHeight) / sample > MAX_SIDE) sample *= 2
-        val bitmap: Bitmap = BitmapFactory.decodeFile(
+        while (maxOf(bounds.outWidth, bounds.outHeight) / (sample * 2) >= MAX_SIDE) sample *= 2
+        val decoded: Bitmap = BitmapFactory.decodeFile(
             source.absolutePath,
             BitmapFactory.Options().apply { inSampleSize = sample },
         ) ?: return null
+
+        val longest = maxOf(decoded.width, decoded.height)
+        val bitmap = if (longest > MAX_SIDE) {
+            val ratio = MAX_SIDE.toFloat() / longest
+            val targetWidth = (decoded.width * ratio).roundToInt().coerceAtLeast(1)
+            val targetHeight = (decoded.height * ratio).roundToInt().coerceAtLeast(1)
+            Bitmap.createScaledBitmap(decoded, targetWidth, targetHeight, true)
+                .also { if (it !== decoded) decoded.recycle() }
+        } else {
+            decoded
+        }
 
         val out = ByteArrayOutputStream(IMAGE_BUDGET_BYTES)
         bitmap.compress(Bitmap.CompressFormat.JPEG, QUALITY, out)
@@ -108,10 +129,19 @@ class PhotoArchive(
         null
     }
 
+    /** Ảnh tải từ Firestore về được đặt tên theo id món; ảnh gốc của người dùng tên uuid. */
+    fun isArchivedCopy(itemId: String, file: File): Boolean = file.name == "$itemId.jpg"
+
     private fun photosDir(): File = File(appContext.filesDir, DIR).apply { mkdirs() }
 
     companion object {
         private const val TAG = "PhotoArchive"
+
+        /**
+         * Phiên bản thuật toán nén. Tăng số này khi cách nén thay đổi để những máy đã
+         * đồng bộ tự gửi lại ảnh nét hơn thay vì giữ bản cũ trên Firestore.
+         */
+        const val VERSION = 2
 
         /** Khớp với thư mục ảnh của CameraScreen để mọi ảnh món nằm một chỗ. */
         private const val DIR = "photos"

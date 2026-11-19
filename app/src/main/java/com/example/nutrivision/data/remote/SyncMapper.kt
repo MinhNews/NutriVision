@@ -76,7 +76,11 @@ object SyncMapper {
         syncStatus = MealEntity.SYNC_SYNCED,
     )
 
-    fun itemToMap(item: MealItemEntity, hasPhoto: Boolean = false): Map<String, Any?> = mapOf(
+    fun itemToMap(
+        item: MealItemEntity,
+        hasPhoto: Boolean = false,
+        photoVersion: Int = 0,
+    ): Map<String, Any?> = mapOf(
         "meal_id" to item.mealId,
         "food_id" to item.foodId,
         "food_name" to item.foodName,
@@ -95,8 +99,11 @@ object SyncMapper {
         "created_at" to item.createdAt,
         "updated_at" to item.updatedAt,
         "deleted_at" to item.deletedAt,
-        // Ảnh nằm ở Firebase Storage (users/{uid}/photos/{itemId}.jpg), Firestore chỉ giữ cờ.
+        // Ảnh nằm trong Firestore (users/{uid}/meal_photos/{itemId}); document món chỉ
+        // giữ cờ `has_photo` và `photo_v` (phiên bản thuật toán nén) để máy kia biết
+        // có cần tải về hoặc gửi lại bản nét hơn không.
         "has_photo" to hasPhoto,
+        "photo_v" to photoVersion,
     )
 
     fun itemFromMap(id: String, map: Map<String, Any?>): MealItemEntity = MealItemEntity(

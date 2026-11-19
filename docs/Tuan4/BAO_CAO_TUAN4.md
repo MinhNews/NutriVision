@@ -135,7 +135,9 @@ Firebase Storage **không dùng được** cho project này: bucket chưa đư�
 users/{uid}/meal_photos/{itemId}   ← document { data: "<base64 JPEG>", updated_at }
 ```
 
-- Ảnh được **nén trước khi gửi**: cạnh dài nhất 720 px, JPEG chất lượng 70 → thường **40–90 KB**, nằm an toàn dưới giới hạn 1 MiB của một document Firestore. Ảnh nén vượt 200 KB thì bỏ qua thay vì đẩy document quá lớn.
+- Ảnh được **nén trước khi gửi**: cạnh dài nhất **đúng 720 px**, JPEG chất lượng 70 → thường **40–90 KB**, nằm an toàn dưới giới hạn 1 MiB của một document Firestore. Ảnh nén vượt 200 KB thì bỏ qua thay vì đẩy document quá lớn.
+- `inSampleSize` của Android chỉ giảm theo luỹ thừa 2 nên một mình nó cho ảnh nhỏ hơn cần thiết (1632 px chia 4 còn 408 px); vì vậy sau khi decode còn scale chính xác bằng `createScaledBitmap`. Ảnh gốc nhỏ hơn 720 px thì giữ nguyên, không phóng to.
+- Mỗi món trên mây có thêm `photo_v` (phiên bản thuật toán nén). Khi phiên bản nén đổi, máy còn giữ **ảnh gốc** tự gửi lại bản nét hơn; máy chỉ có **bản đã nén** (tên file theo id món) thì bỏ qua để không nén chồng làm ảnh mờ dần.
 - `firestore.rules` hiện có `match /{collection}/{docId}` dưới `users/{userId}` đã phủ `meal_photos`, **không cần deploy luật mới**.
 - Document metadata của món chỉ giữ cờ `has_photo`, nên mỗi lần sửa khẩu phần **không** kéo theo tải/đẩy lại ảnh.
 - Chỉ đọc **đúng document của món đang thiếu file**, không quét cả collection: máy thứ hai mở app sẽ tải ảnh về `files/photos/<itemId>.jpg`.
@@ -287,6 +289,7 @@ BUILD SUCCESSFUL
 | **Ảnh thật trong nhật ký** | Màn sửa khẩu phần hiện đúng ảnh người dùng vừa chọn, **không** phải ảnh danh mục `com_tam.webp` |
 | **Xoá món có ảnh** | DB có `deleted_at`; file ảnh biến mất khỏi `files/photos` (10 → 9 file) |
 | **Ảnh tự tải lại từ Firestore** | Xoá file `43964a34…jpg` (2,7 MB) trên máy → force-stop → mở lại app → file `c989baef-416b-4490-9e1c-93cf1072307a.jpg` xuất hiện (**23 KB**, bản nén), DB trỏ đúng file mới, nhật ký hiện lại ảnh "Cơm tấm" |
+| **Nén đúng 720 px** | Bản cũ chỉ còn 306×408 do `inSampleSize`; sau khi sửa, ảnh gửi lại được **540×720 (51–57 KB)**, tải về mở đúng 540×720. Ảnh chỉ có bản nén thì **không** bị nén lại (giữ nguyên 306×408) |
 | **"Về NutriVision" bấm được** | Mở hộp thoại: logo, "Phiên bản 1.0 (bản 1)", email đã xác thực, 4 gạch đầu dòng mô tả hành vi app |
 | Đổi giờ nhắc 10:55, chờ | Thông báo bắn đúng phút, kèm kcal còn thiếu |
 | Bật/tắt từng bữa | Job `meal_reminder` được thay đúng mốc kế tiếp |

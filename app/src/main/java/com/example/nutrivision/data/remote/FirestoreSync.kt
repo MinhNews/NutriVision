@@ -173,56 +173,76 @@ class FirestoreSync(
 
         // ------------------------------------------------------------------ ghi lên
         // Ảnh món nằm trong Firestore (users/{uid}/meal_photos/{itemId}) nên đẩy ảnh
-        // trước, rồi mới ghi metadata kèm cờ `has_photo` để máy kia biết mà tải về.
-        val photoFlags = itemsToPush.associate { item ->
-            item.id to syncPhoto(userId, item, remoteItems[item.id]?.get("has_photo") == true)
+        // trước, rồi mới ghi metadata kèm cờ `has_photo` + `photo_v` để máy kia biết
+        // vừa có ảnh, vừa biết ảnh đang ở phiên bản nén nào.
+        val photoStates = itemsToPush.associate { item ->
+            item.id to ensurePhoto(userId, item, remotePhotoState(remoteItems[item.id]))
         }
         // Ảnh của những món đã đồng bộ từ trước (khi chưa có tính năng này) được bù một lần.
         // Bỏ qua món vừa đẩy ở trên để không nén và gửi trùng hai lần trong cùng một lượt.
         backfillPhotos(
             userId = userId,
-            localItems = localItems.values.filter { it.id !in photoFlags.keys },
+            localItems = localItems.values.filter { it.id !in photoStates.keys },
             remoteItems = remoteItems,
         )
         // Máy này có thể đã bị xoá file ảnh (dọn bộ nhớ, cài lại) trong khi máy kia vẫn còn.
         restoreMissingPhotos(userId, localItems.values, remoteItems)
 
         pushMeals(root.collection(MEALS), mealsToPush)
-        pushItems(root.collection(ITEMS), itemsToPush, photoFlags)
+        pushItems(root.collection(ITEMS), itemsToPush, photoStates)
         pushed += mealsToPush.size + itemsToPush.size
 
         return pushed to pulled
     }
 
+    /** Trạng thái ảnh của một món trên mây: có ảnh chưa, và nén theo phiên bản nào. */
+    private data class PhotoState(val hasPhoto: Boolean, val version: Int)
+
+    private fun remotePhotoState(snapshot: DocumentSnapshot?): PhotoState = PhotoState(
+        hasPhoto = snapshot?.get("has_photo") == true,
+        version = (snapshot?.get("photo_v") as? Number)?.toInt() ?: 0,
+    )
+
     /**
-     * Bảo đảm ảnh của món có trên Firestore. Trả về true khi máy khác tải được ảnh này.
+     * Có cần gửi ảnh lên mây không?
      *
-     * Món đã bị xoá (tombstone) thì dọn ảnh để không tốn dung lượng tài khoản; mất mạng
-     * thì trả false — lần đồng bộ sau món được sửa sẽ thử lại.
+     * Chỉ gửi khi máy này giữ **ảnh gốc** và bản trên mây chưa có, hoặc còn ở phiên bản
+     * nén cũ (để ảnh cũ được thay bằng bản nét hơn). Ảnh do máy khác gửi về (đặt tên
+     * theo id món) đã nén sẵn nên không nén lại — nén chồng sẽ làm ảnh mờ dần.
      */
-    private suspend fun syncPhoto(
-        userId: String,
-        item: MealItemEntity,
-        alreadyUploaded: Boolean,
-    ): Boolean {
-        val archive = photoArchive ?: return item.photoUri != null
-        if (item.deletedAt != null) {
-            archive.delete(userId, item.id)
-            return false
-        }
+    private fun needsUpload(item: MealItemEntity, remote: PhotoState): Boolean {
         val path = item.photoUri?.takeIf { it.isNotBlank() } ?: return false
         val file = File(path)
         if (!file.isFile) return false
-        // Metadata trên máy chủ đã ghi has_photo = true thì khỏi đẩy lại mỗi lần
-        // người dùng sửa khẩu phần.
-        if (alreadyUploaded) return true
-        return archive.upload(userId, item.id, file)
+        if (remote.hasPhoto && photoArchive?.isArchivedCopy(item.id, file) == true) return false
+        return !remote.hasPhoto || remote.version < PhotoArchive.VERSION
+    }
+
+    /**
+     * Bảo đảm ảnh của món có trên Firestore.
+     *
+     * Món đã bị xoá (tombstone) thì dọn ảnh để không tốn dung lượng tài khoản; mất mạng
+     * thì giữ nguyên trạng thái cũ — lần đồng bộ sau sẽ thử lại.
+     */
+    private suspend fun ensurePhoto(
+        userId: String,
+        item: MealItemEntity,
+        remote: PhotoState,
+    ): PhotoState {
+        val archive = photoArchive ?: return remote
+        if (item.deletedAt != null) {
+            archive.delete(userId, item.id)
+            return PhotoState(hasPhoto = false, version = 0)
+        }
+        if (!needsUpload(item, remote)) return remote
+        val uploaded = archive.upload(userId, item.id, File(item.photoUri!!))
+        return if (uploaded) PhotoState(true, PhotoArchive.VERSION) else remote
     }
 
     /**
      * Bù ảnh cho những món đã có trên mây từ trước nhưng chưa từng gửi ảnh lên
-     * (`has_photo` còn false/thiếu). Chỉ ghi thêm cờ, không đụng `updated_at`
-     * nên không tạo vòng đồng bộ mới.
+     * (`has_photo` còn false/thiếu) hoặc còn ở bản nén cũ. Chỉ ghi thêm cờ, không
+     * đụng `updated_at` nên không tạo vòng đồng bộ mới.
      */
     private suspend fun backfillPhotos(
         userId: String,
@@ -230,17 +250,15 @@ class FirestoreSync(
         remoteItems: Map<String, DocumentSnapshot>,
     ) {
         val archive = photoArchive ?: return
-        val candidates = localItems.filter { item ->
-            item.deletedAt == null &&
-                !item.photoUri.isNullOrBlank() &&
-                File(item.photoUri).isFile &&
-                remoteItems[item.id] != null &&
-                remoteItems[item.id]?.get("has_photo") != true
-        }
-        candidates.forEach { item ->
+        localItems.forEach { item ->
+            val snapshot = remoteItems[item.id] ?: return@forEach
+            if (item.deletedAt != null) return@forEach
+            if (!needsUpload(item, remotePhotoState(snapshot))) return@forEach
             if (archive.upload(userId, item.id, File(item.photoUri!!))) {
                 runCatching {
-                    remoteItems.getValue(item.id).reference.update("has_photo", true).awaitTask()
+                    snapshot.reference.update(
+                        mapOf("has_photo" to true, "photo_v" to PhotoArchive.VERSION),
+                    ).awaitTask()
                 }
             }
         }
@@ -297,14 +315,19 @@ class FirestoreSync(
     private suspend fun pushItems(
         collection: CollectionReference,
         items: List<MealItemEntity>,
-        photoFlags: Map<String, Boolean>,
+        photoStates: Map<String, PhotoState>,
     ) {
         items.chunked(BATCH_LIMIT).forEach { chunk ->
             val batch = firestore.batch()
             chunk.forEach { item ->
+                val photo = photoStates[item.id] ?: PhotoState(hasPhoto = false, version = 0)
                 batch.set(
                     collection.document(item.id),
-                    SyncMapper.itemToMap(item, hasPhoto = photoFlags[item.id] == true),
+                    SyncMapper.itemToMap(
+                        item = item,
+                        hasPhoto = photo.hasPhoto,
+                        photoVersion = photo.version,
+                    ),
                 )
             }
             batch.commit().awaitTask()
