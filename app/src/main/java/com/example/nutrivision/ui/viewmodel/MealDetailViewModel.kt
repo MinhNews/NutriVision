@@ -35,6 +35,8 @@ data class MealDetailUiState(
     val date: String = DateUtils.todayKey(),
     val saving: Boolean = false,
     val error: String? = null,
+    /** Ảnh người dùng chụp/chọn cho món này (đường dẫn file trên máy), null khi thêm từ danh mục. */
+    val photoPath: String? = null,
 ) {
     /** Calo/đạm/carb/béo thật theo đúng số gram đang chọn. */
     val nutrition: Nutrition
@@ -97,6 +99,7 @@ class MealDetailViewModel(
                         grams = item.portionGrams,
                         mealType = MealType.fromKey(meal?.mealType),
                         date = meal?.date ?: DateUtils.todayKey(),
+                        photoPath = item.photoUri,
                     )
                 }
                 return@launch

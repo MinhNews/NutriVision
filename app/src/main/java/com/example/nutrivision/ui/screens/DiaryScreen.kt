@@ -480,6 +480,7 @@ private fun DiaryItemRow(
             name = item.foodName,
             isDrink = item.foodName.guessFoodKind() == "drink",
             size = 42.dp,
+            photoPath = item.photoUri,
         )
         Spacer(Modifier.width(10.dp))
         Column(modifier = Modifier.weight(1f)) {

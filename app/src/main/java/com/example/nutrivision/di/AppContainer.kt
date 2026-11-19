@@ -11,6 +11,7 @@ import com.example.nutrivision.data.prefs.SessionManager
 import com.example.nutrivision.data.prefs.ThemeManager
 import com.example.nutrivision.data.remote.FirestoreSync
 import com.example.nutrivision.data.remote.GeminiFoodService
+import com.example.nutrivision.data.remote.PhotoArchive
 import com.example.nutrivision.data.repository.FoodRepository
 import com.example.nutrivision.data.repository.MealRepository
 import com.example.nutrivision.data.repository.UserRepository
@@ -45,7 +46,9 @@ class AppContainer(context: Context) {
 
     val localDataStore: LocalDataStore by lazy { LocalDataStore(database) }
 
-    val firestoreSync: FirestoreSync by lazy { FirestoreSync(database) }
+    val photoArchive: PhotoArchive by lazy { PhotoArchive(appContext) }
+
+    val firestoreSync: FirestoreSync by lazy { FirestoreSync(database, photoArchive = photoArchive) }
 
     val userRepository: UserRepository by lazy { UserRepository(database.userDao()) }
 

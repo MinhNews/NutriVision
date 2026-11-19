@@ -11,6 +11,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 
 /** Kết quả một lần đồng bộ, hiển thị được ngay trên tab Cá nhân. */
 data class SyncOutcome(
@@ -34,6 +35,7 @@ data class SyncOutcome(
  */
 class FirestoreSync(
     private val db: NutriVisionDatabase,
+    private val photoArchive: PhotoArchive? = null,
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
 ) {
 
@@ -154,6 +156,7 @@ class FirestoreSync(
                             incoming.copy(
                                 mealId = mealId,
                                 foodId = incoming.foodId.takeIf { foodExists },
+                                photoUri = resolvePhoto(userId, itemId, local, remote),
                             )
                         )
                         pulled++
@@ -169,11 +172,112 @@ class FirestoreSync(
         }
 
         // ------------------------------------------------------------------ ghi lên
+        // Ảnh món nằm trong Firestore (users/{uid}/meal_photos/{itemId}) nên đẩy ảnh
+        // trước, rồi mới ghi metadata kèm cờ `has_photo` để máy kia biết mà tải về.
+        val photoFlags = itemsToPush.associate { item ->
+            item.id to syncPhoto(userId, item, remoteItems[item.id]?.get("has_photo") == true)
+        }
+        // Ảnh của những món đã đồng bộ từ trước (khi chưa có tính năng này) được bù một lần.
+        // Bỏ qua món vừa đẩy ở trên để không nén và gửi trùng hai lần trong cùng một lượt.
+        backfillPhotos(
+            userId = userId,
+            localItems = localItems.values.filter { it.id !in photoFlags.keys },
+            remoteItems = remoteItems,
+        )
+        // Máy này có thể đã bị xoá file ảnh (dọn bộ nhớ, cài lại) trong khi máy kia vẫn còn.
+        restoreMissingPhotos(userId, localItems.values, remoteItems)
+
         pushMeals(root.collection(MEALS), mealsToPush)
-        pushItems(root.collection(ITEMS), itemsToPush)
+        pushItems(root.collection(ITEMS), itemsToPush, photoFlags)
         pushed += mealsToPush.size + itemsToPush.size
 
         return pushed to pulled
+    }
+
+    /**
+     * Bảo đảm ảnh của món có trên Firestore. Trả về true khi máy khác tải được ảnh này.
+     *
+     * Món đã bị xoá (tombstone) thì dọn ảnh để không tốn dung lượng tài khoản; mất mạng
+     * thì trả false — lần đồng bộ sau món được sửa sẽ thử lại.
+     */
+    private suspend fun syncPhoto(
+        userId: String,
+        item: MealItemEntity,
+        alreadyUploaded: Boolean,
+    ): Boolean {
+        val archive = photoArchive ?: return item.photoUri != null
+        if (item.deletedAt != null) {
+            archive.delete(userId, item.id)
+            return false
+        }
+        val path = item.photoUri?.takeIf { it.isNotBlank() } ?: return false
+        val file = File(path)
+        if (!file.isFile) return false
+        // Metadata trên máy chủ đã ghi has_photo = true thì khỏi đẩy lại mỗi lần
+        // người dùng sửa khẩu phần.
+        if (alreadyUploaded) return true
+        return archive.upload(userId, item.id, file)
+    }
+
+    /**
+     * Bù ảnh cho những món đã có trên mây từ trước nhưng chưa từng gửi ảnh lên
+     * (`has_photo` còn false/thiếu). Chỉ ghi thêm cờ, không đụng `updated_at`
+     * nên không tạo vòng đồng bộ mới.
+     */
+    private suspend fun backfillPhotos(
+        userId: String,
+        localItems: Collection<MealItemEntity>,
+        remoteItems: Map<String, DocumentSnapshot>,
+    ) {
+        val archive = photoArchive ?: return
+        val candidates = localItems.filter { item ->
+            item.deletedAt == null &&
+                !item.photoUri.isNullOrBlank() &&
+                File(item.photoUri).isFile &&
+                remoteItems[item.id] != null &&
+                remoteItems[item.id]?.get("has_photo") != true
+        }
+        candidates.forEach { item ->
+            if (archive.upload(userId, item.id, File(item.photoUri!!))) {
+                runCatching {
+                    remoteItems.getValue(item.id).reference.update("has_photo", true).awaitTask()
+                }
+            }
+        }
+    }
+
+    /** Đồng bộ xong phải thấy ảnh: thiếu file thì tải lại từ Firestore. */
+    private suspend fun restoreMissingPhotos(
+        userId: String,
+        localItems: Collection<MealItemEntity>,
+        remoteItems: Map<String, DocumentSnapshot>,
+    ) {
+        val archive = photoArchive ?: return
+        localItems
+            .filter { item ->
+                item.deletedAt == null &&
+                    (item.photoUri == null || !File(item.photoUri).isFile) &&
+                    remoteItems[item.id]?.get("has_photo") == true
+            }
+            .forEach { item ->
+                val file = archive.download(userId, item.id) ?: return@forEach
+                db.mealDao().setItemPhoto(item.id, file.absolutePath)
+            }
+    }
+
+    /** Giữ ảnh đang có trên máy; nếu món đến từ máy khác và có ảnh thì tải về. */
+    private suspend fun resolvePhoto(
+        userId: String,
+        itemId: String,
+        local: MealItemEntity?,
+        remote: Map<String, Any?>,
+    ): String? {
+        val archive = photoArchive ?: return local?.photoUri?.takeIf { File(it).isFile }
+        val localFile = local?.photoUri?.let(::File)?.takeIf { it.isFile }
+            ?: archive.localFile(itemId).takeIf { it.isFile }
+        if (localFile != null) return localFile.absolutePath
+        if (remote["has_photo"] != true) return local?.photoUri
+        return archive.download(userId, itemId)?.absolutePath ?: local?.photoUri
     }
 
     private suspend fun pushMeals(
@@ -193,11 +297,15 @@ class FirestoreSync(
     private suspend fun pushItems(
         collection: CollectionReference,
         items: List<MealItemEntity>,
+        photoFlags: Map<String, Boolean>,
     ) {
         items.chunked(BATCH_LIMIT).forEach { chunk ->
             val batch = firestore.batch()
             chunk.forEach { item ->
-                batch.set(collection.document(item.id), SyncMapper.itemToMap(item))
+                batch.set(
+                    collection.document(item.id),
+                    SyncMapper.itemToMap(item, hasPhoto = photoFlags[item.id] == true),
+                )
             }
             batch.commit().awaitTask()
         }
