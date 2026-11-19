@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import com.example.nutrivision.domain.model.Food
 import com.example.nutrivision.domain.model.MealType
+import java.io.File
 import com.example.nutrivision.ui.theme.MealBreakfast
 import com.example.nutrivision.ui.theme.MealDinner
 import com.example.nutrivision.ui.theme.MealLunch
@@ -69,12 +70,19 @@ fun foodIcon(food: Food?): ImageVector = when {
 private fun Context.hasFoodImage(foodId: String): Boolean =
     runCatching { assets.open("food_images/$foodId.webp").close() }.isSuccess
 
+/**
+ * Ảnh đại diện của món.
+ *
+ * Ưu tiên ảnh người dùng tự chụp/chọn ([photoPath]); không có hoặc file đã bị xoá thì
+ * quay về ảnh đóng gói trong assets, cuối cùng là icon gradient.
+ */
 @Composable
 fun FoodAvatar(
     food: Food?,
     modifier: Modifier = Modifier,
     size: Dp = 52.dp,
     icon: ImageVector? = null,
+    photoPath: String? = null,
 ) {
     FoodIdAvatar(
         foodId = food?.id,
@@ -82,10 +90,11 @@ fun FoodAvatar(
         icon = icon ?: foodIcon(food),
         modifier = modifier,
         size = size,
+        photoPath = photoPath,
     )
 }
 
-/** Dùng cho meal_items: có foodId nên vẫn hiện được ảnh thật, thiếu ảnh thì fallback. */
+/** Dùng cho meal_items: ưu tiên ảnh chụp thật, thiếu ảnh thì fallback về danh mục. */
 @Composable
 fun FoodIdAvatar(
     foodId: String?,
@@ -94,6 +103,7 @@ fun FoodIdAvatar(
     size: Dp = 52.dp,
     isDrink: Boolean = false,
     icon: ImageVector? = null,
+    photoPath: String? = null,
 ) {
     val fallbackIcon = icon ?: if (isDrink) Icons.Rounded.LocalCafe else Icons.Rounded.Restaurant
     val context = LocalContext.current
@@ -101,8 +111,36 @@ fun FoodIdAvatar(
         foodId != null && context.hasFoodImage(foodId)
     }
     val shape = RoundedCornerShape(size * 0.32f)
+    // File ảnh do người dùng chụp/chọn nằm trong filesDir; có thể bị xoá hoặc hỏng nên
+    // kiểm tra tồn tại trước, và vẫn để slot error phòng khi decode thất bại.
+    val photo = remember(photoPath) { photoPath?.let(::File)?.takeIf { it.isFile } }
 
-    if (foodId != null && hasImage) {
+    if (photo != null) {
+        SubcomposeAsyncImage(
+            model = photo,
+            contentDescription = name,
+            contentScale = ContentScale.Crop,
+            modifier = modifier
+                .size(size)
+                .clip(shape),
+            loading = {
+                AvatarFallback(
+                    seed = foodId ?: name,
+                    icon = fallbackIcon,
+                    shape = shape,
+                    iconSize = size * 0.46f,
+                )
+            },
+            error = {
+                AvatarFallback(
+                    seed = foodId ?: name,
+                    icon = fallbackIcon,
+                    shape = shape,
+                    iconSize = size * 0.46f,
+                )
+            },
+        )
+    } else if (foodId != null && hasImage) {
         SubcomposeAsyncImage(
             model = "file:///android_asset/food_images/$foodId.webp",
             contentDescription = name,

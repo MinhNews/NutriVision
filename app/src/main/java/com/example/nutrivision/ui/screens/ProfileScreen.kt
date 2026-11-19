@@ -12,6 +12,9 @@ import com.example.nutrivision.domain.text.tr
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,9 +32,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.CloudSync
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.CameraAlt
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.HelpOutline
 import androidx.compose.material.icons.rounded.Info
@@ -60,6 +66,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -67,6 +74,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.nutrivision.BuildConfig
+import com.example.nutrivision.R
 import com.example.nutrivision.data.prefs.AppLanguage
 import com.example.nutrivision.data.prefs.ReminderState
 import com.example.nutrivision.data.prefs.ThemeMode
@@ -116,6 +124,7 @@ fun ProfileScreen(
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showReminderDialog by remember { mutableStateOf(false) }
+    var showAboutDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     // Bữa đang chờ cấp quyền thông báo (để bật lại đúng bữa đó sau khi người dùng đồng ý).
@@ -362,6 +371,7 @@ fun ProfileScreen(
                         "Phiên bản ${BuildConfig.VERSION_NAME}",
                         "Version ${BuildConfig.VERSION_NAME}",
                     ),
+                    onClick = { showAboutDialog = true },
                     showDivider = false,
                 )
             }
@@ -396,13 +406,21 @@ fun ProfileScreen(
 
         item {
             Text(
-                "NutriVision 1.0",
+                "NutriVision ${BuildConfig.VERSION_NAME}",
                 style = MaterialTheme.typography.labelSmall,
                 color = TextMuted,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
             )
         }
+    }
+
+    if (showAboutDialog) {
+        AboutDialog(
+            accountEmail = accountEmail,
+            emailVerified = emailVerified,
+            onDismiss = { showAboutDialog = false },
+        )
     }
 
     if (showThemeDialog && themeController != null) {
@@ -650,6 +668,155 @@ private fun ThemePickerDialog(
         containerColor = SurfaceLight,
         shape = RoundedCornerShape(24.dp),
     )
+}
+
+/**
+ * Hộp thoại "Về NutriVision": chỉ hiện thông tin thật lấy từ app — phiên bản build,
+ * tài khoản đang đăng nhập, và những gì app thực sự làm với dữ liệu của người dùng.
+ */
+@Composable
+private fun AboutDialog(
+    accountEmail: String,
+    emailVerified: Boolean,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(tr("Về NutriVision", "About NutriVision"), style = MaterialTheme.typography.titleLarge) },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painter = painterResource(id = R.drawable.app_logo),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(RoundedCornerShape(17.dp)),
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            "NutriVision",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = TextPrimary,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            tr(
+                                "Phiên bản ${BuildConfig.VERSION_NAME} (bản ${BuildConfig.VERSION_CODE})",
+                                "Version ${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})",
+                            ),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TextMuted,
+                        )
+                    }
+                }
+
+                Text(
+                    tr(
+                        "Nhận diện món ăn bằng AI ngay trên máy, tính dinh dưỡng theo khẩu phần và đồng bộ nhật ký giữa các thiết bị của bạn.",
+                        "Recognise dishes with on-device AI, work out nutrition for each portion, and keep your diary in sync across your devices.",
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondary,
+                )
+
+                AboutRow(
+                    icon = Icons.Rounded.AutoAwesome,
+                    title = tr("Nhận diện trên máy", "On-device recognition"),
+                    detail = tr(
+                        "Mô hình TFLite chạy trong máy, dùng được khi không có mạng.",
+                        "A TFLite model runs on the device and works offline.",
+                    ),
+                )
+                AboutRow(
+                    icon = Icons.Rounded.CameraAlt,
+                    title = tr("Ảnh chỉ rời máy khi bạn đồng ý", "Photos leave only when you ask"),
+                    detail = tr(
+                        "Ảnh được gửi lên Gemini chỉ khi bạn bấm \"Nhờ AI mô tả\".",
+                        "A photo is sent to Gemini only when you tap \"Ask AI to describe\".",
+                    ),
+                )
+                AboutRow(
+                    icon = Icons.Rounded.CloudSync,
+                    title = tr("Đồng bộ tự động", "Automatic sync"),
+                    detail = tr(
+                        "Nhật ký và ảnh món tự đồng bộ qua Firebase cho các thiết bị cùng tài khoản.",
+                        "Your diary and meal photos sync through Firebase across your own devices.",
+                    ),
+                )
+                AboutRow(
+                    icon = Icons.Rounded.Lock,
+                    title = tr("Tài khoản riêng", "Private account"),
+                    detail = tr(
+                        "Mỗi tài khoản chỉ đọc và ghi được dữ liệu của chính mình.",
+                        "Each account can only read and write its own data.",
+                    ),
+                )
+                AboutRow(
+                    icon = Icons.Rounded.Email,
+                    title = tr("Đang đăng nhập", "Signed in as"),
+                    detail = if (emailVerified) {
+                        tr("$accountEmail · đã xác thực", "$accountEmail · verified")
+                    } else {
+                        tr("$accountEmail · chưa xác thực email", "$accountEmail · email not verified")
+                    },
+                )
+
+                Text(
+                    tr(
+                        "Số liệu dinh dưỡng là ước lượng để tham khảo, không thay thế tư vấn y tế.",
+                        "Nutrition numbers are estimates for reference only, not medical advice.",
+                    ),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TextMuted,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(tr("Đóng", "Close"), color = PrimaryGreen)
+            }
+        },
+        containerColor = SurfaceLight,
+        shape = RoundedCornerShape(24.dp),
+    )
+}
+
+@Composable
+private fun AboutRow(
+    icon: ImageVector,
+    title: String,
+    detail: String,
+) {
+    Row(verticalAlignment = Alignment.Top) {
+        Box(
+            modifier = Modifier
+                .size(30.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(MintMid.copy(alpha = 0.4f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(icon, contentDescription = null, tint = ForestInk, modifier = Modifier.size(16.dp))
+        }
+        Spacer(Modifier.width(10.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                title,
+                style = MaterialTheme.typography.bodySmall,
+                color = TextPrimary,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                detail,
+                style = MaterialTheme.typography.labelSmall,
+                color = TextMuted,
+            )
+        }
+    }
 }
 
 @Composable

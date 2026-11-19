@@ -120,12 +120,30 @@ users/{uid}/meal_items/{itemId}  ← món trong bữa (để phẳng, không l�
 - Xung đột bữa trùng ngày + loại giữa hai máy được **gộp về một bữa**, món được chuyển sang bữa đó thay vì nhân đôi.
 - Món trỏ tới `food_id` không tồn tại trên máy kia thì bị bỏ, không tạo bản ghi mồ côi.
 
-### 4.3. Kiểm chứng thật trên emulator
+### 4.3. Kiểm chứng thật trên máy thật
 
 1. Thêm món "Ba ba nấu chuối đậu" (417 kcal) vào bữa sáng → không bấm gì thêm.
 2. Sau ~2 giây, `last_sync_at` trong `shared_prefs` nhảy từ **10:57:18** sang **10:59:36** (đúng thời điểm lưu món + debounce).
 3. `adb uninstall com.example.nutrivision` → cài lại → đăng nhập lại cùng tài khoản.
 4. Hồ sơ (Minh, mục tiêu 2.236 kcal) và món bữa sáng **quay về đủ**, không thao tác tay — ảnh `tuan4_sync_restored.png`.
+
+### 4.4. Ảnh món đồng bộ qua Firestore (không dùng Firebase Storage)
+
+Firebase Storage **không dùng được** cho project này: bucket chưa được tạo (upload trả HTTP 404) và muốn bật Storage phải nâng lên gói **Blaze có trả phí**. Vì vậy ảnh món được đồng bộ bằng chính Firestore:
+
+```
+users/{uid}/meal_photos/{itemId}   ← document { data: "<base64 JPEG>", updated_at }
+```
+
+- Ảnh được **nén trước khi gửi**: cạnh dài nhất **đúng 720 px**, JPEG chất lượng 70 → thường **40–90 KB**, nằm an toàn dưới giới hạn 1 MiB của một document Firestore. Ảnh nén vượt 200 KB thì bỏ qua thay vì đẩy document quá lớn.
+- `inSampleSize` của Android chỉ giảm theo luỹ thừa 2 nên một mình nó cho ảnh nhỏ hơn cần thiết (1632 px chia 4 còn 408 px); vì vậy sau khi decode còn scale chính xác bằng `createScaledBitmap`. Ảnh gốc nhỏ hơn 720 px thì giữ nguyên, không phóng to.
+- Mỗi món trên mây có thêm `photo_v` (phiên bản thuật toán nén). Khi phiên bản nén đổi, máy còn giữ **ảnh gốc** tự gửi lại bản nét hơn; máy chỉ có **bản đã nén** (tên file theo id món) thì bỏ qua để không nén chồng làm ảnh mờ dần.
+- `firestore.rules` hiện có `match /{collection}/{docId}` dưới `users/{userId}` đã phủ `meal_photos`, **không cần deploy luật mới**.
+- Document metadata của món chỉ giữ cờ `has_photo`, nên mỗi lần sửa khẩu phần **không** kéo theo tải/đẩy lại ảnh.
+- Chỉ đọc **đúng document của món đang thiếu file**, không quét cả collection: máy thứ hai mở app sẽ tải ảnh về `files/photos/<itemId>.jpg`.
+- Món bị xoá (tombstone) thì ảnh trên Firestore cũng bị xoá, không tốn dung lượng tài khoản.
+- Mọi thao tác ảnh là **best-effort**: mất mạng hay lỗi quyền thì ghi log `PhotoArchive` và bỏ qua; nhật ký trên máy vẫn hiển thị bình thường vì ảnh gốc còn trong `filesDir`.
+
 
 ---
 
@@ -177,6 +195,9 @@ WM-DiagnosticsWrkr: 140befa4…  MealReminderWorker  ENQUEUED  meal_reminder
 - Bỏ dòng placeholder **"Trợ giúp & phản hồi / Sắp có"**; dòng "Về NutriVision" lấy `BuildConfig.VERSION_NAME` thật.
 - Mọi chữ mới đều đi qua `tr("vi", "en")`, đổi ngôn ngữ trong Cá nhân là đổi ngay cả hộp thoại nhắc nhở, thông báo và câu lỗi đồng bộ.
 - Lỗi đồng bộ tự động **không bật snackbar** (tránh làm phiền); chỉ hiện một dòng đỏ dưới mục "Đồng bộ" ở tab Cá nhân.
+- Hàng **"Về NutriVision"** bấm được: mở hộp thoại hiện **thông tin thật** — logo, `BuildConfig.VERSION_NAME` + `VERSION_CODE`, email đang đăng nhập kèm trạng thái xác thực, và 4 gạch đầu dòng mô tả đúng những gì app làm (nhận diện trên máy, ảnh chỉ gửi Gemini khi người dùng bấm, đồng bộ tự động, tài khoản riêng tư). Cuối trang là dòng miễn trừ "số liệu chỉ để tham khảo".
+- Ảnh món trong nhật ký và màn sửa khẩu phần **ưu tiên đúng ảnh người dùng vừa chụp/chọn** (`photoUri`), chỉ khi món không có ảnh mới rơi về ảnh danh mục trong assets, cuối cùng mới là khung gradient + icon.
+- Xoá món hoặc xoá cả bữa thì **file ảnh cũng bị xoá** nếu không còn món nào khác dùng (`countItemsUsingPhoto`), tránh để lại rác trong bộ nhớ máy.
 
 ---
 
@@ -191,6 +212,7 @@ WM-DiagnosticsWrkr: 140befa4…  MealReminderWorker  ENQUEUED  meal_reminder
 | `data/remote/SyncMapper.kt` | Map Entity ⇄ Firestore document |
 | `data/remote/GeminiFoodService.kt` | Gọi Gemini mô tả món + quy đổi /100 g (endpoint `/{model}:generateContent`) |
 | `data/prefs/ReminderSettings.kt` | Giờ + bật/tắt từng bữa (mặc định **tắt**), migrate khoá `enabled` cũ |
+| `data/remote/PhotoArchive.kt` | Nén ảnh ≤ 720 px q70 rồi mã hoá base64 lưu `users/{uid}/meal_photos/{itemId}`; tải/xoá theo từng document |
 | `data/local/relation/DataFingerprint.kt` | "Vân tay" bảng để phát hiện thay đổi |
 | `notifications/MealSlot.kt` | 3 bữa, `ReminderPlanner.next()`, nội dung thông báo động |
 | `notifications/ReminderScheduler.kt` | Hẹn mốc kế tiếp, tạo kênh, bắn thông báo |
@@ -207,7 +229,13 @@ WM-DiagnosticsWrkr: 140befa4…  MealReminderWorker  ENQUEUED  meal_reminder
 |---|---|
 | `MainActivity.kt` | Nối state mới, `onAppForeground()` khi quay lại app |
 | `ui/viewmodel/AppViewModel.kt` | `startAutoSync()` (debounce 2 s), `onAppForeground()`, `lastSyncError`, bỏ `syncNow`, `setReminderEnabled/Time` |
-| `ui/screens/ProfileScreen.kt` | Bỏ nút đồng bộ tay, thêm `ReminderDialog` + TimePicker, cảnh báo khi quyền thông báo bị tắt, bỏ placeholder |
+| `ui/screens/ProfileScreen.kt` | Bỏ nút đồng bộ tay, thêm `ReminderDialog` + TimePicker, cảnh báo khi quyền thông báo bị tắt, bỏ placeholder, hàng "Về NutriVision" bấm được mở `AboutDialog` |
+| `ui/components/FoodVisuals.kt` | `FoodAvatar`/`FoodIdAvatar` nhận `photoPath`: ảnh thật của người dùng → ảnh assets → gradient + icon |
+| `ui/screens/DiaryScreen.kt` | Truyền `photoUri` của món xuống avatar trong nhật ký |
+| `ui/screens/MealDetailScreen.kt`, `ui/viewmodel/MealDetailViewModel.kt` | Header màn sửa khẩu phần hiện đúng ảnh thật của món |
+| `data/remote/FirestoreSync.kt` | Ghi/tải/xoá ảnh qua `PhotoArchive`, cờ `has_photo`, bù ảnh cũ, tải lại ảnh bị thiếu |
+| `data/local/dao/MealDao.kt` | `countItemsUsingPhoto` (dọn file khi xoá món), `setItemPhoto` (gắn lại ảnh sau khi tải) |
+| `data/repository/MealRepository.kt` | `releasePhoto()` khi xoá món/xoá bữa |
 | `ui/screens/MainShell.kt` | Truyền state nhắc nhở + lỗi đồng bộ xuống Cá nhân |
 | `ui/screens/CameraScreen.kt` | Sửa icon thanh trạng thái, chip nhãn ngắn, thêm **"Chọn ảnh có sẵn"** (Photo Picker) + `importPickedPhoto()` nén ảnh ≤ 1600 px |
 | `data/local/dao/MealDao.kt` | `countMealTypeItems`, `totalCalories`, 2 hàm `observe*Fingerprint` |
@@ -248,7 +276,7 @@ BUILD SUCCESSFUL
 - Ảnh xám trơn **không** được vượt ngưỡng tin cậy.
 - Test mẫu của project.
 
-### 8.3. Kiểm thử tay trên emulator (Pixel 7, Android 17)
+### 8.3. Kiểm thử tay trên máy thật (CPH2819, 360 dp)
 
 | Việc | Kết quả |
 |---|---|
@@ -258,6 +286,11 @@ BUILD SUCCESSFUL
 | Model tự tin nhưng nghi sai | 96 % vẫn có dòng "Nhận diện sai? Nhờ AI xem lại" → Gemini trả "Hot dog" 300 kcal, badge "AI ước lượng" |
 | Thêm món → tự đồng bộ | `last_sync_at` đổi sau ~2 s, không bấm gì |
 | Gỡ + cài lại + đăng nhập | Hồ sơ và món cũ quay về từ Firestore |
+| **Ảnh thật trong nhật ký** | Màn sửa khẩu phần hiện đúng ảnh người dùng vừa chọn, **không** phải ảnh danh mục `com_tam.webp` |
+| **Xoá món có ảnh** | DB có `deleted_at`; file ảnh biến mất khỏi `files/photos` (10 → 9 file) |
+| **Ảnh tự tải lại từ Firestore** | Xoá file `43964a34…jpg` (2,7 MB) trên máy → force-stop → mở lại app → file `c989baef-416b-4490-9e1c-93cf1072307a.jpg` xuất hiện (**23 KB**, bản nén), DB trỏ đúng file mới, nhật ký hiện lại ảnh "Cơm tấm" |
+| **Nén đúng 720 px** | Bản cũ chỉ còn 306×408 do `inSampleSize`; sau khi sửa, ảnh gửi lại được **540×720 (51–57 KB)**, tải về mở đúng 540×720. Ảnh chỉ có bản nén thì **không** bị nén lại (giữ nguyên 306×408) |
+| **"Về NutriVision" bấm được** | Mở hộp thoại: logo, "Phiên bản 1.0 (bản 1)", email đã xác thực, 4 gạch đầu dòng mô tả hành vi app |
 | Đổi giờ nhắc 10:55, chờ | Thông báo bắn đúng phút, kèm kcal còn thiếu |
 | Bật/tắt từng bữa | Job `meal_reminder` được thay đúng mốc kế tiếp |
 | Cài mới (chưa cấp quyền thông báo) | Nhắc nhở mặc định tắt; hộp thoại hiện cảnh báo + nút mở cài đặt |
@@ -278,6 +311,8 @@ BUILD SUCCESSFUL
 | `docs/screenshots/tuan4_pick_photo.png` | "Chọn ảnh có sẵn" → TFLite nhận "Phở" 56 % |
 | `docs/screenshots/tuan4_gemini_result.png` | Gemini trả "Phở bò" + dinh dưỡng, badge "AI ước lượng" |
 | `docs/screenshots/tuan4_ai_saved.png` | Món AI đã nằm trong nhật ký bữa trưa |
+| `docs/screenshots/tuan4_photo_restore.png` | Nhật ký hiện lại ảnh "Cơm tấm" sau khi file trên máy bị xoá và tải lại từ Firestore |
+| `docs/screenshots/tuan4_about.png` | Hộp thoại "Về NutriVision" với version, email và mô tả thật |
 
 ---
 
@@ -286,8 +321,8 @@ BUILD SUCCESSFUL
 1. **Khoá Gemini không nằm trong repo** (đúng quy ước bảo mật): máy khác muốn thử AI phải tự thêm `gemini.api.key` vào `local.properties` rồi build lại; chưa có khoá thì nút "Nhờ AI mô tả" tự ẩn và app vẫn chạy đủ bằng model trên máy. Chất lượng mô tả phụ thuộc hạn mức/khoá của người dùng.
 2. Model TFLite đạt khoảng **71% top-1** trên tập test gốc; ảnh chụp thực tế trong nhà có thể thấp hơn — vì vậy app luôn cho chọn lại món và hiện "Chưa chắc chắn" khi độ tin cậy < 0.7.
 3. Model **không có lớp đồ uống**; ảnh đồ uống thường bị đoán sang món ăn gần nhất.
-4. Ảnh đã chụp (`photoUri`) đã lưu trong DB nhưng **chưa hiển thị** trong nhật ký.
+4. Ảnh món đồng bộ qua Firestore nên phải **nén** (≤ 720 px, q70). Máy thứ hai nhận ảnh nén, không phải bản gốc full độ phân giải; ảnh gốc vẫn nằm trên máy đã chụp.
 5. Nhắc nhở dựa trên giờ máy; nếu người dùng đổi múi giờ hoặc tắt tiết kiệm pin mạnh, hệ điều hành có thể trễ vài phút.
-6. Đồng bộ cần mạng; khi mất mạng app vẫn dùng bình thường và tự thử lại ở lần thay đổi kế tiếp hoặc lần mở app sau.
+6. Đồng bộ cần mạng; khi mất mạng app vẫn dùng bình thường và tự thử lại ở lần thay đổi kế tiếp hoặc lần mở app sau. Ảnh chưa gửi được sẽ được bù ở lần đồng bộ sau.
 
-**Kế hoạch tuần 5–6:** kiểm thử toàn bộ luồng trên máy thật, bổ sung ảnh món trong nhật ký, hoàn thiện báo cáo và chuẩn bị demo.
+**Kế hoạch tuần 5–6:** kiểm chứng vòng đồng bộ ảnh giữa **hai thiết bị** (trên một máy đã xác nhận: xoá file → mở app → ảnh nén tự tải lại), đo lại dung lượng máy sau khi nén ảnh, hoàn thiện báo cáo và chuẩn bị demo.

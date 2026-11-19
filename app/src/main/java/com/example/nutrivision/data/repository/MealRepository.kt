@@ -14,6 +14,7 @@ import com.example.nutrivision.domain.model.MealWithItems
 import com.example.nutrivision.domain.model.Nutrition
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.io.File
 import java.util.UUID
 
 /**
@@ -134,12 +135,26 @@ class MealRepository(
         val item = mealDao.getItem(itemId) ?: return@withTransaction
         mealDao.softDeleteItem(itemId, now)
         removeMealIfEmpty(item.mealId, now)
+        releasePhoto(item.photoUri)
     }
 
     suspend fun deleteMeal(mealId: String) = db.withTransaction {
         val now = System.currentTimeMillis()
+        val photos = mealDao.getItems(mealId).mapNotNull { it.photoUri }
         mealDao.softDeleteItemsOfMeal(mealId, now)
         mealDao.softDeleteMeal(mealId, now)
+        photos.forEach { releasePhoto(it) }
+    }
+
+    /**
+     * Xoá file ảnh khi không còn món nào (chưa bị xoá) dùng tới. Ảnh do camera/photo picker
+     * tạo ra nằm trong filesDir và không được Room quản lý nên phải dọn tay, tránh phình bộ nhớ.
+     * Tombstone vẫn giữ `photo_uri` để máy khác biết là đã xoá, nên chỉ đếm món còn sống.
+     */
+    private suspend fun releasePhoto(photoUri: String?) {
+        val path = photoUri?.takeIf { it.isNotBlank() } ?: return
+        if (mealDao.countItemsUsingPhoto(path) > 0) return
+        runCatching { File(path).delete() }
     }
 
     private suspend fun ensureMeal(

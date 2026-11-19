@@ -259,7 +259,7 @@ private fun FoodHeader(uiState: MealDetailUiState) {
 
     GlassCard(modifier = Modifier.fillMaxWidth(), contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            FoodAvatar(food = food, size = 76.dp)
+            FoodAvatar(food = food, size = 76.dp, photoPath = uiState.photoPath)
             Spacer(Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(

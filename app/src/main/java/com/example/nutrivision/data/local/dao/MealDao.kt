@@ -130,6 +130,14 @@ interface MealDao {
     @Query("UPDATE meal_items SET deleted_at = :now, updated_at = :now WHERE id = :itemId")
     suspend fun softDeleteItem(itemId: String, now: Long)
 
+    /** Đếm món còn sống đang dùng cùng một file ảnh — để biết có được xoá file không. */
+    @Query("SELECT COUNT(*) FROM meal_items WHERE photo_uri = :photoUri AND deleted_at IS NULL")
+    suspend fun countItemsUsingPhoto(photoUri: String): Int
+
+    /** Gắn lại đường dẫn ảnh sau khi tải từ Firestore về; không đổi updated_at để khỏi đẩy lại. */
+    @Query("UPDATE meal_items SET photo_uri = :photoUri WHERE id = :itemId")
+    suspend fun setItemPhoto(itemId: String, photoUri: String)
+
     @Query("UPDATE meal_items SET deleted_at = :now, updated_at = :now WHERE meal_id = :mealId AND deleted_at IS NULL")
     suspend fun softDeleteItemsOfMeal(mealId: String, now: Long)
 
