@@ -286,6 +286,8 @@ BUILD SUCCESSFUL
 | Gỡ + cài lại + đăng nhập | Hồ sơ và món cũ quay về từ Firestore |
 | **Ảnh thật trong nhật ký** | Màn sửa khẩu phần hiện đúng ảnh người dùng vừa chọn, **không** phải ảnh danh mục `com_tam.webp` |
 | **Xoá món có ảnh** | DB có `deleted_at`; file ảnh biến mất khỏi `files/photos` (10 → 9 file) |
+| **Ảnh tự tải lại từ Firestore** | Xoá file `43964a34…jpg` (2,7 MB) trên máy → force-stop → mở lại app → file `c989baef-416b-4490-9e1c-93cf1072307a.jpg` xuất hiện (**23 KB**, bản nén), DB trỏ đúng file mới, nhật ký hiện lại ảnh "Cơm tấm" |
+| **"Về NutriVision" bấm được** | Mở hộp thoại: logo, "Phiên bản 1.0 (bản 1)", email đã xác thực, 4 gạch đầu dòng mô tả hành vi app |
 | Đổi giờ nhắc 10:55, chờ | Thông báo bắn đúng phút, kèm kcal còn thiếu |
 | Bật/tắt từng bữa | Job `meal_reminder` được thay đúng mốc kế tiếp |
 | Cài mới (chưa cấp quyền thông báo) | Nhắc nhở mặc định tắt; hộp thoại hiện cảnh báo + nút mở cài đặt |
@@ -306,6 +308,8 @@ BUILD SUCCESSFUL
 | `docs/screenshots/tuan4_pick_photo.png` | "Chọn ảnh có sẵn" → TFLite nhận "Phở" 56 % |
 | `docs/screenshots/tuan4_gemini_result.png` | Gemini trả "Phở bò" + dinh dưỡng, badge "AI ước lượng" |
 | `docs/screenshots/tuan4_ai_saved.png` | Món AI đã nằm trong nhật ký bữa trưa |
+| `docs/screenshots/tuan4_photo_restore.png` | Nhật ký hiện lại ảnh "Cơm tấm" sau khi file trên máy bị xoá và tải lại từ Firestore |
+| `docs/screenshots/tuan4_about.png` | Hộp thoại "Về NutriVision" với version, email và mô tả thật |
 
 ---
 
@@ -318,4 +322,4 @@ BUILD SUCCESSFUL
 5. Nhắc nhở dựa trên giờ máy; nếu người dùng đổi múi giờ hoặc tắt tiết kiệm pin mạnh, hệ điều hành có thể trễ vài phút.
 6. Đồng bộ cần mạng; khi mất mạng app vẫn dùng bình thường và tự thử lại ở lần thay đổi kế tiếp hoặc lần mở app sau. Ảnh chưa gửi được sẽ được bù ở lần đồng bộ sau.
 
-**Kế hoạch tuần 5–6:** kiểm chứng vòng đồng bộ ảnh giữa hai thiết bị (xoá file ảnh trên máy → mở app → ảnh tự tải lại), chụp bổ sung ảnh minh chứng hộp thoại "Về NutriVision", hoàn thiện báo cáo và chuẩn bị demo.
+**Kế hoạch tuần 5–6:** kiểm chứng vòng đồng bộ ảnh giữa **hai thiết bị** (trên một máy đã xác nhận: xoá file → mở app → ảnh nén tự tải lại), đo lại dung lượng máy sau khi nén ảnh, hoàn thiện báo cáo và chuẩn bị demo.
